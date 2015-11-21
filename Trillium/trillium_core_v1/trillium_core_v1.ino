@@ -1,8 +1,6 @@
 /*
 TRILLIUM CORE V1
 
-QQQQQQQQQ
-
 UBC Orbit
 Thunderbird Satellite
 October 2015
@@ -20,26 +18,30 @@ Sebastian Cline
 Purpose:
 Software for controlling radiation redundency in the Trillium architechture. Code designed for implementation on ATmega2560 chips operating at 16MHz.
 */
-
-
-
-
-
-
-
 /*
-Pin declarations here
+
 */
 
+//Libraries
 #include "TimerOne.h"
 #include "TimerThree.h"
 #include "avr/interrupt.h"
 #include "avr/power.h"
 #include "avr/sleep.h"
 
+
+//Pin declarations here
 const int chipRestart = 4; //sends out call for reset of other chip os cycles
-int resetOSCyclePin = 2; //recieve pin of interupt to reset chip os cycle  
-int wakeCorePin = 3; //jump wake external interupt for exiting sleep mode //call this when battery is good
+int resetOSCyclePin = 2; //recieve pin of interupt to reset chip os cycle  //change pin of this
+int wakeCorePin = 8; //jump wake external interupt for exiting sleep mode //call this when battery is good //changed pin number
+int input=5; //temporary input value for voting array pin
+int comAC=2; //compared value of A and C
+int comAB=3; //compared value of A and B
+
+//I2C comminucation
+#define CORE1 1
+#define CORE2 2
+#define CORE3 3
 
 
 /*
@@ -59,6 +61,11 @@ void setup(){
   pinMode(resetOSCyclePin, INPUT);
   pinMode(wakeCorePin, INPUT);
   
+  pinMode(input,INPUT);  //input to this core
+  pinMode(comAC,INPUT);  //input to nand for C
+  pinMode(comAB,INPUT);  //input to nand for B
+  
+  
   
   //external interupt reset os loop
   attachInterrupt(digitalPinToInterrupt(resetOSCyclePin), resetOSCycle, FALLING);
@@ -67,15 +74,23 @@ void setup(){
   //internal interrupts
   //still need to determine how often interrupt runs
   Timer1.initialize();  
-  Timer3.initialize(); 
+  Timer3.initialize();
+  
 
 
 
   //serial comms startup
+
   Serial1.begin(28800); //comms to other core
   Serial2.begin(28800); //comms to other core
   
-  //startup functions (run once)
+  
+
+  //include all internal interrupts
+      Timer1.attachInterrupt(startUpSync);
+      Timer3.attachInterrupt(T3interrupt);
+
+ //startup functions (run once)
   startUpSync();
 
   
@@ -96,9 +111,7 @@ void loop(){
   while(OSCycle<OSCycleCap){
     if (!sleepMode){
       sleepDepth=chooseSleepMode(); //checking to see if satellite should go to sleep
-      //include all internal interrupts
-      Timer1.attachInterrupt(startUpSync);
-      Timer3.attachInterrupt(T3interrupt);
+      
       OSCycle++;      
     }      
                            }  
@@ -132,12 +145,12 @@ void loop(){
                        }
                        }
     
-                }      
+                }
+    
+                
  
   
 }
-
-
 
 
 //checks which sleep mode to go into, checked periodically with main loop
@@ -145,9 +158,9 @@ int chooseSleepMode(){
   //things to verify:
   //get how much power is availble to determine which sleep mode to go into
    
-  //first mode 
-  
-  // change in to a switch statement, as this first conditional statement will always run due to if(1)
+  //first mode
+ 
+  // TODO: fix these conditionals as this conditional will always run due to if(1) 
   if(1){
     setSleepMode(1);
     return sleepDepth;  //not sure ifs it just better to return a int 
@@ -231,7 +244,76 @@ void setSleepMode(int a){
 //internal interrupt methods  stub
 
 void T3interrupt(){
+  
+
   //fn calls to various methods that need to be called regularly - still need to determine
   
   }
+
+
+//voting array
+int voteingArray(){
+  //serial reads as a string compare those arrays
+  
+  //read from core from serial port of other two core
+  int Bdata[32]; //change length later
+  int Cdata[32];
+  int Adata[32];
+
+  //reading B from serial
+  if (Serial1.available() > 0){ // Don't read unless
+  int bAvail=Serial1.available();
+  for(int i=0; i<bAvail; i++){
+   Bdata[i] = Serial1.read();
+   }                          } 
+  //reading C from serial
+   if (Serial2.available() > 0){ // Don't read unless
+  int cAvail=Serial2.available();
+  for(int i=0; i<cAvail; i++){
+   Cdata[i] = Serial2.read();} }
+
+//reading value of A from digitalPin while theres something to read
+int a=0;
+  while (digitalRead(input)){
+    if(digitalRead(input)==-1)
+      break;
+      else{
+    Adata[a]=digitalRead(input);
+    //write this value to the other boards
+    Serial1.write(digitalRead(input));  
+    Serial2.write(digitalRead(input));
+    
+    a++;}     
+    }
+
+
+int j=0;
+int AB;
+while(j<32){
+  if (Adata[j]==Bdata[j]){
+    AB=0;}
+    else{AB=1;
+    j=0;
+    break;}
+  }
+
+int AC;
+while(j<32){
+  if (Adata[j]==Cdata[j]){
+    AC=0;}
+    else{AC=1;
+    break;}
+  }
+
+//sending vote for B
+digitalWrite(AB,comAB);
+//sending vote for C
+digitalWrite(AC,comAC);  
+  }
+ 
+  
+
+
+
+  
 
