@@ -1,6 +1,8 @@
 /*
 TRILLIUM CORE V1
 
+QQQQQQQQQ
+
 UBC Orbit
 Thunderbird Satellite
 October 2015
@@ -65,8 +67,7 @@ void setup(){
   //internal interrupts
   //still need to determine how often interrupt runs
   Timer1.initialize();  
-  Timer3.initialize();
-  
+  Timer3.initialize(); 
 
 
 
@@ -131,12 +132,12 @@ void loop(){
                        }
                        }
     
-                }
-    
-                
+                }      
  
   
 }
+
+
 
 
 //checks which sleep mode to go into, checked periodically with main loop
@@ -145,6 +146,8 @@ int chooseSleepMode(){
   //get how much power is availble to determine which sleep mode to go into
    
   //first mode 
+  
+  // change in to a switch statement, as this first conditional statement will always run due to if(1)
   if(1){
     setSleepMode(1);
     return sleepDepth;  //not sure ifs it just better to return a int 
@@ -228,8 +231,6 @@ void setSleepMode(int a){
 //internal interrupt methods  stub
 
 void T3interrupt(){
-  
-
   //fn calls to various methods that need to be called regularly - still need to determine
   
   }
