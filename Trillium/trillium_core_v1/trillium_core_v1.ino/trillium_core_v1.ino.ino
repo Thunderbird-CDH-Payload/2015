@@ -39,6 +39,8 @@ int input=5; //temporary input value for voting array pin
 int comAC=2; //compared value of A and C
 int comAB=3; //compared value of A and B
 
+
+//don't need this just have
 //pin # temporary
 int iBusy=6; //indicates that this arduino is busy receving data from trillium or writting //directly connected to two other cores 
 int busyB=10;  //indication B is busy
@@ -274,14 +276,12 @@ void T3interrupt(){
 //voting array
 int voteingArray(){
 
-  //serial reads as a string compare those arrays
-  
- 
+//serial reads as a string compare those arrays
 
-  //reading value of A from digitalPin while theres something to read
+//reading value of A from digitalPin while theres something to read
 int a=0;
   while (digitalRead(input)){
-    digitalWrite(1,iBusy);  //indication to other boards that its busy
+    
     if(digitalRead(input)==-1)
       break;
       else{
@@ -291,13 +291,10 @@ int a=0;
     
     a++;}     
     }
-    digitalWrite(0,iBusy); //indication that this board isnt busy anymore
 
 //writes this boards data to other boards
 writeB();
 writeC();
-
-  
     
 
 
@@ -328,10 +325,10 @@ while(j<32){
   }
 
 //comparing A and C's data
-int j=0;
+int f=0;
 int AC;
-while(j<32){
-  if (Adata[j]==Cdata[j]){
+while(f<32){
+  if (Adata[f]==Cdata[f]){
     AC=0;}
     else{AC=1;
     break;}
@@ -357,7 +354,7 @@ void readC(){
 //A writes to B only if its ready
 void writeB(){
   int i=0;
-  while ((Bstatus==0) && i<Adata.size){
+  while (i<32){
     
       Serial1.write(Adata[i]);
       i++;
@@ -366,7 +363,7 @@ void writeB(){
 //A writes to C only if its ready
 void writeC(){
   int i=0;
-  while ((Cstatus==0) && i<Adata.size){
+  while (i<32){
     
       Serial2.write(Adata[i]);
       i++;
