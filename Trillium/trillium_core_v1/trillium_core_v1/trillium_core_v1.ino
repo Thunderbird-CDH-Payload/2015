@@ -309,6 +309,7 @@ while(j<32){
     else{AB=1;
     j=0;
     break;}
+    j++;
   }
 
 //comparing A and C's data
@@ -319,6 +320,7 @@ while(f<32){
     AC=0;}
     else{AC=1;
     break;}
+    f++;
   }
 
 //sending vote for B
@@ -349,6 +351,8 @@ void writeC(){
       }}
 
  
+ 
+int compareString
   
 
 
