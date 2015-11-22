@@ -39,7 +39,7 @@ int input=5; //temporary input value for voting array pin
 int comAC=2; //compared value of A and C
 int comAB=3; //compared value of A and B
 
- //read from core from serial port of other two core
+//read from core from serial port of other two core
 //data array from different boards
 int Bdata[32]; //change length later
 int Cdata[32];
@@ -69,41 +69,27 @@ void setup(){
   
   pinMode(input,INPUT);  //input to this core
   pinMode(comAC,INPUT);  //input to nand for C
-  pinMode(comAB,INPUT);  //input to nand for B
-
- 
+  pinMode(comAB,INPUT);  //input to nand for B  
   
-  
-  
-  //external interupt reset os loop
+//external interupt reset os loop
   attachInterrupt(digitalPinToInterrupt(resetOSCyclePin), resetOSCycle, FALLING);
-  attachInterrupt(digitalPinToInterrupt(wakeCorePin), wakeCore, CHANGE); 
-  
-  
+  attachInterrupt(digitalPinToInterrupt(wakeCorePin), wakeCore, CHANGE);   
 
-  //internal interrupts
-  //still need to determine how often interrupt runs
+//internal interrupts
+//still need to determine how often interrupt runs
   Timer1.initialize();  
   Timer3.initialize();
   
-
-
-
-  //serial comms startup
-
+//serial comms startup
   Serial1.begin(28800); //comms to other core
   Serial2.begin(28800); //comms to other core
   
-  
+//Internal interrupts
+  Timer1.attachInterrupt(startUpSync);  //sync them 
+  Timer3.attachInterrupt(T3interrupt);
 
-  //include all internal interrupts
-      Timer1.attachInterrupt(startUpSync);  //sync them 
-      Timer3.attachInterrupt(T3interrupt);
-
- //startup functions (run once)
-  startUpSync();
-
-  
+//startup functions (run once)
+  startUpSync();  
 }
 
 
@@ -120,8 +106,7 @@ void loop(){
   //OS cycle
   while(OSCycle<OSCycleCap){
     if (!sleepMode){
-      sleepDepth=chooseSleepMode(); //checking to see if satellite should go to sleep
-      
+      sleepDepth=chooseSleepMode(); //checking to see if satellite should go to sleep      
       OSCycle++;      
     }      
                            }  
@@ -171,7 +156,7 @@ int chooseSleepMode(){
   //first mode 
   if(1){
     setSleepMode(1);
-    return sleepDepth;  //not sure ifs it just better to return a int 
+    return sleepDepth;  
   }
 
   //second mode
@@ -216,7 +201,7 @@ void resetOSCycle(){
 
 //wakes the core, starts the OSCycle again
 void wakeCore(){
-  sleep_disable();   //can you put this here?
+  sleep_disable();   
   sleepMode=false; 
   startUpSync();
 }
@@ -262,8 +247,6 @@ void T3interrupt(){
 //voting array
 int voteingArray(){
 
-//serial reads as a string compare those arrays
-
 //reading value of A from digitalPin while theres something to read
 int a=0;
   while (digitalRead(input)){
@@ -280,23 +263,26 @@ int a=0;
 
 delay(200);
 //writes this boards data to other boards
+
 writeB();
 writeC();
 delay(200);
 
 
     
-  //reading B from serial
-  if (Serial1.available() > 0){ // Don't read unless
+//reading B from serial
+if (Serial1.available() > 0){ 
   int bAvail=Serial1.available();
   for(int i=0; i<bAvail; i++){
-   Bdata[i] = Serial1.read();
-   }                          } 
-  //reading C from serial
-   if (Serial2.available() > 0){ // Don't read unless
+    Bdata[i] = Serial1.read();}           
+   }
+                            
+//reading C from serial
+if (Serial2.available() > 0){ // Don't read unless
   int cAvail=Serial2.available();
   for(int i=0; i<cAvail; i++){
-   Cdata[i] = Serial2.read();} }
+   Cdata[i] = Serial2.read();}
+   }
 
 delay(200);
 
@@ -333,8 +319,7 @@ digitalWrite(AC,comAC);
 //A writes to B
 void writeB(){
   int i=0;
-  while (i<32){
-    
+  while (i<32){    
       Serial1.write(Adata[i]);
       i++;
       }}
@@ -342,8 +327,7 @@ void writeB(){
 //A writes to C
 void writeC(){
   int i=0;
-  while (i<32){
-    
+  while (i<32){    
       Serial2.write(Adata[i]);
       i++;
       }}
