@@ -39,23 +39,13 @@ int input=5; //temporary input value for voting array pin
 int comAC=2; //compared value of A and C
 int comAB=3; //compared value of A and B
 
-
-//don't need this just have
-//pin # temporary
-int iBusy=6; //indicates that this arduino is busy receving data from trillium or writting //directly connected to two other cores 
-int busyB=10;  //indication B is busy
-int busyC=9;   //indication C is busy
-
  //read from core from serial port of other two core
 //data array from different boards
 int Bdata[32]; //change length later
 int Cdata[32];
 int Adata[32];
 
-//I2C comminucation
-#define CORE1 1
-#define CORE2 2
-#define CORE3 3
+
 
 
 /*
@@ -69,9 +59,7 @@ int sleepDepth;  //the depth of the core sleep (power saving measures) (needed t
 //characteristic variables, can change behaviours
 const int OSCycleCap = 10000; //number of OS cycles before roll-over
 
-//boards busy indication
-int Bstatus=0;
-int Cstatus=0;
+
 
 
 void setup(){
@@ -83,17 +71,15 @@ void setup(){
   pinMode(comAC,INPUT);  //input to nand for C
   pinMode(comAB,INPUT);  //input to nand for B
 
-  pinMode(iBusy,INPUT); 
-  pinMode(busyB,INPUT);
-  pinMode(busyC,INPUT);  
+ 
   
   
   
   //external interupt reset os loop
   attachInterrupt(digitalPinToInterrupt(resetOSCyclePin), resetOSCycle, FALLING);
   attachInterrupt(digitalPinToInterrupt(wakeCorePin), wakeCore, CHANGE); 
-  attachInterrupt(digitalPinToInterrupt(busyB),readB,RISING);
-  attachInterrupt(digitalPinToInterrupt(busyB),readC,RISING); 
+  
+  
 
   //internal interrupts
   //still need to determine how often interrupt runs
@@ -292,10 +278,11 @@ int a=0;
     a++;}     
     }
 
+delay(200);
 //writes this boards data to other boards
 writeB();
 writeC();
-    
+delay(200);
 
 
     
@@ -311,7 +298,7 @@ writeC();
   for(int i=0; i<cAvail; i++){
    Cdata[i] = Serial2.read();} }
 
-
+delay(200);
 
 //comparing A and B's data
 int j=0;
@@ -343,15 +330,7 @@ digitalWrite(AC,comAC);
   }
 
 
-//ISR for indication that baords are busy
-void readB(){
-  Bstatus=1;}
-
-void readC(){
-  Cstatus=1;}
-
-
-//A writes to B only if its ready
+//A writes to B
 void writeB(){
   int i=0;
   while (i<32){
@@ -360,7 +339,7 @@ void writeB(){
       i++;
       }}
 
-//A writes to C only if its ready
+//A writes to C
 void writeC(){
   int i=0;
   while (i<32){
