@@ -1,6 +1,7 @@
 /*
 TRILLIUM CORE V1
 
+
 UBC Orbit
 Thunderbird Satellite
 October 2015
@@ -38,6 +39,17 @@ int input=5; //temporary input value for voting array pin
 int comAC=2; //compared value of A and C
 int comAB=3; //compared value of A and B
 
+//pin # temporary
+int iBusy=6; //indicates that this arduino is busy receving data from trillium or writting //directly connected to two other cores 
+int busyB=10;  //indication B is busy
+int busyC=9;   //indication C is busy
+
+ //read from core from serial port of other two core
+//data array from different boards
+int Bdata[32]; //change length later
+int Cdata[32];
+int Adata[32];
+
 //I2C comminucation
 #define CORE1 1
 #define CORE2 2
@@ -55,6 +67,10 @@ int sleepDepth;  //the depth of the core sleep (power saving measures) (needed t
 //characteristic variables, can change behaviours
 const int OSCycleCap = 10000; //number of OS cycles before roll-over
 
+//boards busy indication
+int Bstatus=0;
+int Cstatus=0;
+
 
 void setup(){
   pinMode(chipRestart, OUTPUT);  
@@ -64,12 +80,18 @@ void setup(){
   pinMode(input,INPUT);  //input to this core
   pinMode(comAC,INPUT);  //input to nand for C
   pinMode(comAB,INPUT);  //input to nand for B
+
+  pinMode(iBusy,INPUT); 
+  pinMode(busyB,INPUT);
+  pinMode(busyC,INPUT);  
   
   
   
   //external interupt reset os loop
   attachInterrupt(digitalPinToInterrupt(resetOSCyclePin), resetOSCycle, FALLING);
-  attachInterrupt(digitalPinToInterrupt(wakeCorePin), wakeCore, CHANGE);  
+  attachInterrupt(digitalPinToInterrupt(wakeCorePin), wakeCore, CHANGE); 
+  attachInterrupt(digitalPinToInterrupt(busyB),readB,RISING);
+  attachInterrupt(digitalPinToInterrupt(busyB),readC,RISING); 
 
   //internal interrupts
   //still need to determine how often interrupt runs
@@ -87,7 +109,7 @@ void setup(){
   
 
   //include all internal interrupts
-      Timer1.attachInterrupt(startUpSync);
+      Timer1.attachInterrupt(startUpSync);  //sync them 
       Timer3.attachInterrupt(T3interrupt);
 
  //startup functions (run once)
@@ -158,9 +180,7 @@ int chooseSleepMode(){
   //things to verify:
   //get how much power is availble to determine which sleep mode to go into
    
-  //first mode
- 
-  // TODO: fix these conditionals as this conditional will always run due to if(1) 
+  //first mode 
   if(1){
     setSleepMode(1);
     return sleepDepth;  //not sure ifs it just better to return a int 
@@ -253,13 +273,35 @@ void T3interrupt(){
 
 //voting array
 int voteingArray(){
+
   //serial reads as a string compare those arrays
   
-  //read from core from serial port of other two core
-  int Bdata[32]; //change length later
-  int Cdata[32];
-  int Adata[32];
+ 
 
+  //reading value of A from digitalPin while theres something to read
+int a=0;
+  while (digitalRead(input)){
+    digitalWrite(1,iBusy);  //indication to other boards that its busy
+    if(digitalRead(input)==-1)
+      break;
+      else{
+    Adata[a]=digitalRead(input);
+    //write this value to the other boards
+    
+    
+    a++;}     
+    }
+    digitalWrite(0,iBusy); //indication that this board isnt busy anymore
+
+//writes this boards data to other boards
+writeB();
+writeC();
+
+  
+    
+
+
+    
   //reading B from serial
   if (Serial1.available() > 0){ // Don't read unless
   int bAvail=Serial1.available();
@@ -272,21 +314,9 @@ int voteingArray(){
   for(int i=0; i<cAvail; i++){
    Cdata[i] = Serial2.read();} }
 
-//reading value of A from digitalPin while theres something to read
-int a=0;
-  while (digitalRead(input)){
-    if(digitalRead(input)==-1)
-      break;
-      else{
-    Adata[a]=digitalRead(input);
-    //write this value to the other boards
-    Serial1.write(digitalRead(input));  
-    Serial2.write(digitalRead(input));
-    
-    a++;}     
-    }
 
 
+//comparing A and B's data
 int j=0;
 int AB;
 while(j<32){
@@ -297,6 +327,8 @@ while(j<32){
     break;}
   }
 
+//comparing A and C's data
+int j=0;
 int AC;
 while(j<32){
   if (Adata[j]==Cdata[j]){
@@ -309,7 +341,37 @@ while(j<32){
 digitalWrite(AB,comAB);
 //sending vote for C
 digitalWrite(AC,comAC);  
+//resetting done by hardware
+
   }
+
+
+//ISR for indication that baords are busy
+void readB(){
+  Bstatus=1;}
+
+void readC(){
+  Cstatus=1;}
+
+
+//A writes to B only if its ready
+void writeB(){
+  int i=0;
+  while ((Bstatus==0) && i<Adata.size){
+    
+      Serial1.write(Adata[i]);
+      i++;
+      }}
+
+//A writes to C only if its ready
+void writeC(){
+  int i=0;
+  while ((Cstatus==0) && i<Adata.size){
+    
+      Serial2.write(Adata[i]);
+      i++;
+      }}
+
  
   
 
