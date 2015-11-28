@@ -118,7 +118,7 @@ void writeC(){
 */
 //Gets signal
 void getSignalData(){
-  Serial.print("
+  Serial.print("Got data from Main:");
   int a=0;
 while(Serial1.available()>0){  
   Adata[a]==Serial1.read();
