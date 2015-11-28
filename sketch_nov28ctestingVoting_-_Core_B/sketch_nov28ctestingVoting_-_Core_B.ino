@@ -100,11 +100,12 @@ if (comBC){
 }
 //A writes to B
 void writeA(){
-  int i=0;
-  while (i<32){    
+//  int i=0;
+//  while (i<32){    
       Serial2.write(Adata[i]);
-      i++;
-      }}
+//      i++;
+//      }
+}
 /*
 //A writes to C
 void writeC(){
@@ -117,19 +118,23 @@ void writeC(){
 //Gets signal
 void getSignalData(){
   int a=0;
-while(Serial1.available()>0){  
+while(Serial1.available()>0){ 
+   Serial.print("Got data from Main:"); 
   Bdata[a]==Serial1.read();
   Serial.print(Bdata[a]);
   a++;}
+  Bdata[a]='\0';
   }
 
 //Get A's data
 void readA(){
-  if (Serial2.available() > 0){ 
-  int aAvail=Serial2.available();
-  for(int i=0; i<aAvail; i++){
-    Adata[i] = Serial2.read();}           
-   }
+  int a=0;
+  Serial.println("Getting A's data:");
+  while (Serial2.available() > 0){ 
+
+    Adata[a] = Serial2.read();
+    a++;}    
+    Adata[a] = '\0';    
   }
 /*
 void readC(){

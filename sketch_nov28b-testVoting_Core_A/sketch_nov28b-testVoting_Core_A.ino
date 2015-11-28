@@ -102,11 +102,12 @@ if (comAC){
 
 //A writes to B
 void writeB(){
-  int i=0;
-  while (i<32){    
+//  int i=0;
+//  while (i<32){    
       Serial2.write(Adata[i]);
-      i++;
-      }}
+//      i++;
+//      }
+    }
 /*
 //A writes to C
 void writeC(){
@@ -124,15 +125,18 @@ while(Serial1.available()>0){
   Adata[a]==Serial1.read();
   Serial.print(Adata[a]);
   a++;}
+  Adata[a]='\0';
   }
 
 //Get B's data
 void readB(){
   int b=0;
+  Serial.println("Getting B's data:");
   while (Serial2.available() > 0){ 
 
     Bdata[b] = Serial2.read();
-    b++;}           
+    b++;}    
+    Bdata[b] = '\0';    
    }
 
   
