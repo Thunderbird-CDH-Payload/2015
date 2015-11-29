@@ -7,6 +7,7 @@
 char Bdata[32];
 char Adata[32];
 
+boolean getMaindata =false;
 
 void setup() {
     
@@ -19,7 +20,7 @@ void setup() {
 
 void loop() {
     // put your main code here, to run repeatedly:
-    Serial.print("going to call voting array");
+    Serial.print("going to call voting array\n");
     votingArray();
     
 }
@@ -28,41 +29,46 @@ void loop() {
 //if theres data is going to be sent  call this
 //TODO check if there is data needed to be compared
 void votingArray(){
-    delay(5000);
+    //delay(5000);
     //Read data from Trill
-    Serial.print("going to call getSignalDatat");
+    Serial.print("going to call getSignalData\n");
     getSignalData();
+
+    if (getMaindata){
+   // delay(5000);
     
-    delay(5000);
-    
-    Serial.print("going to write to B");
+    Serial.print("going to write to B\n");
     
     writeA();
     
     delay(200);
     
-    Serial.print("going to read from B");
+    Serial.print("going to read from B\n");
     readA(); //reading A from serial
     
     
     delay(200);
-}
+}}
 
 //Gets signal
 void getSignalData(){
     int a=0;
-    Serial.print("Got data from Main:");
+    Serial.print("Got data from Main:\n");
+    getMaindata=false;
     while(Serial1.available()>0){
         Bdata[a]==Serial1.read();
         Serial.print(Bdata[a]);
-        a++;}
+        a++;
+        getMaindata=true;
+        Serial.print(getMaindata);}
+        Serial.print(getMaindata);
     Bdata[a]='\0';
 }
 
 
 //B writes to A
 void writeA(){
-    Serial.print("writing to A");
+    Serial.print("writing to A\n");
     Serial2.write(Bdata);
     
 }
@@ -71,7 +77,7 @@ void writeA(){
 //Get A's data
 void readA(){
     int a=0;
-    Serial.println("Getting A's data:");
+    Serial.println("Getting A's data:\n");
     while (Serial2.available() > 0){ 
         
         Adata[a] = Serial2.read();
