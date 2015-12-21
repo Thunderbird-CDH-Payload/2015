@@ -21,11 +21,20 @@ char Cdata[BUFFSIZE];
 int ac = 0;
 int ab = 0;
 
+int Breset = 12;
+int Creset = 13;
+
 void setup() {
   Serial.begin(SERIAL_RATE);  
   Serial1.begin(SERIAL_RATE);
   Serial2.begin(SERIAL_RATE);
-  Serial3.begin(SERIAL_RATE);  
+  Serial3.begin(SERIAL_RATE);
+
+  pinMode(Breset, OUTPUT);
+  pinMode(Creset, OUTPUT);
+
+  digitalWrite(Breset, LOW);
+  digitalWrite(Creset, LOW);  
 }
 
 void loop() {
@@ -48,7 +57,19 @@ void votingArray(){
     Serial.print("AC Compare: ");
     Serial.println(ac);   
     
-  }  
+    if (ab){
+      digitalWrite(Breset, HIGH);
+    }
+    if (ac){
+      digitalWrite(Creset, HIGH);
+    }
+    if (ab || ac){
+      delay(200); // give time for the arduinos to reset 
+    }
+    
+    digitalWrite(Breset, LOW);
+    digitalWrite(Creset, LOW);
+  } 
 }
 
 int getSignalData(){
