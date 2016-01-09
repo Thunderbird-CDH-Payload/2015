@@ -121,9 +121,9 @@ void loop() {
   votingArray();
   
   //OS cycle
-  while(OSCycle<OSCycleCap){
+  while(OSCycle < OSCycleCap){
     if (!sleepMode){
-      sleepDepth=chooseSleepMode(); //checking to see if satellite should go to sleep      
+      sleepDepth = chooseSleepMode(); //checking to see if satellite should go to sleep      
       OSCycle++;      
     }      
   }
@@ -335,7 +335,11 @@ int chooseSleepMode(){
   else{
     setSleepMode(0);
     return sleepDepth;
-  }  
+  }
+  
+  //reset OSCycle
+  resetOSCycle();
+  
 }
 
 
