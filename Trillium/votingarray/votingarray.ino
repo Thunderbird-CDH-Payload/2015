@@ -124,9 +124,9 @@ void loop() {
   while(OSCycle < OSCycleCap){
     if (!sleepMode){
       sleepDepth = chooseSleepMode(); //checking to see if satellite should go to sleep      
-      OSCycle++;      
-    }      
-  }
+      OSCycle++;   
+    }
+  } 
   //sleep mode cycle, "wakes up" trillium core periodically to check systems, send ping or otherwise, requires an internal or external interupt to wake
   if (sleepMode){
   //internal clock setup
@@ -300,35 +300,36 @@ int chooseSleepMode(){
   //get how much power is availble to determine which sleep mode to go into
   
   
-  
   /*
     TODO: FIX THE LOGIC FOR THE CONDIITONAL STATEMENTS HERE, if(1) means first statement will ALWAYS execute and all other logic is IGNORED...
+    replace someVar with the variable you want to compare the logic with
   */
+  int someVar = 0;
   //first mode 
-  if(1){
+  if(someVar == 1){
     setSleepMode(1);
     return sleepDepth;  
   }
 
   //second mode
-  else if(2){
+  else if(someVar == 2){
     setSleepMode(2);
     return sleepDepth;
   }  
 
   //thrid mode
-  else if(3){
+  else if(someVar == 3){
     setSleepMode(3);
     return sleepDepth;
   }  
 
   //fourth mode
-  else if(4){
+  else if(someVar == 4){
     setSleepMode(4);
     return sleepDepth;
   }
 
-  else if (5){
+  else if (someVar == 5){
     setSleepMode(5);
     return sleepDepth;
   }
