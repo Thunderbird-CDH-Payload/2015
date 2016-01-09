@@ -1,6 +1,34 @@
-// testing voting array 
+/*
+TRILLIUM CORE V1
+
+
+UBC Orbit
+Thunderbird Satellite
+October 2015
+
+Creative Commons License CC-BY-3.0 
+https://creativecommons.org/licenses/by/3.0/
+
+
+Project lead:
+Sebastian Cline
+  cline.sebastian@gmail.com
+  teammanager@ubcorbit.com
+
+
+Purpose:
+Software for controlling radiation redundency in the Trillium architechture. Code designed for implementation on ATmega2560 chips operating at 16MHz.
+*/
+
 // This code is used on all three arduinos.
 // Default serial (Serial) is used to debug the code on pc, can remove all code involving it.
+
+//Libraries
+#include "TimerOne.h"
+#include "TimerThree.h"
+#include "avr/interrupt.h"
+#include "avr/power.h"
+#include "avr/sleep.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -22,6 +50,15 @@
 #define CHAR2 'A'
 #define END_CHAR 'Z'
 
+//Pin declarations here
+const int chipRestart = 4; //sends out call for reset of other chip os cycles
+int resetOSCyclePin = 2; //recieve pin of interupt to reset chip os cycle  //change pin of this
+int wakeCorePin = 8; //jump wake external interupt for exiting sleep mode //call this when battery is good //changed pin number
+
+int Breset = 12; // pin to reset logic for MOSFET for Arduino B
+int Creset = 13; // pin to reset logic for MOSFET for Arduino C
+
+// Variables for voting array use
 // Buffers for storing received data from the other Arduinos
 char Adata[BUFFER_SIZE];
 char Bdata[BUFFER_SIZE];
@@ -30,8 +67,14 @@ char Cdata[BUFFER_SIZE];
 int ac = 0;
 int ab = 0;
 
-int Breset = 12;
-int Creset = 13;
+//variables for general system use
+volatile int OSCycle = 0; //number of cycles of the OS, keeps things running in check, allows for synchronized reset
+boolean sleepMode = false; //determines sleep mode access
+int sleepDepth;  //the depth of the core sleep (power saving measures) (needed to make it global)
+
+//characteristic variables, can change behaviours
+const int OSCycleCap = 10000; //number of OS cycles before roll-over
+
 
 void setup() {
   Serial.begin(SERIAL_RATE);  
@@ -42,13 +85,73 @@ void setup() {
   pinMode(Breset, OUTPUT);
   pinMode(Creset, OUTPUT);
 
+  pinMode(chipRestart, OUTPUT);  
+  pinMode(resetOSCyclePin, INPUT);
+  pinMode(wakeCorePin, INPUT);
+  
+  //external interupt reset os loop
+  attachInterrupt(digitalPinToInterrupt(resetOSCyclePin), resetOSCycle, FALLING);
+  attachInterrupt(digitalPinToInterrupt(wakeCorePin), wakeCore, CHANGE);   
+
+  //internal interrupts
+  //still need to determine how often interrupt runs
+  Timer1.initialize();  
+  Timer3.initialize();
+  
+  //Internal interrupts
+  Timer1.attachInterrupt(startUpSync);  //sync them 
+  Timer3.attachInterrupt(T3interrupt);
+
+  //startup functions (run once)
+  startUpSync();  
+
   digitalWrite(Breset, LOW);
   digitalWrite(Creset, LOW);  
 }
 
 void loop() {
+  
+  sleepDepth = 0; //just intially setting it to being awake
+  
   // call the voting array function
   votingArray();
+  
+  //OS cycle
+  while(OSCycle<OSCycleCap){
+    if (!sleepMode){
+      sleepDepth=chooseSleepMode(); //checking to see if satellite should go to sleep      
+      OSCycle++;      
+    }      
+  }
+  //sleep mode cycle, "wakes up" trillium core periodically to check systems, send ping or otherwise, requires an internal or external interupt to wake
+  if (sleepMode){
+  //internal clock setup
+
+    //function call to check for wake up of the core, run sparingly, in function of sleep depth
+    //do something as a function of depth of sleep  
+    if (!(sleepDepth==0)){
+      switch(sleepDepth) {
+        case 1:
+          //do something for sleepDepth of 1
+          break;
+        case 2:
+          //do something for sleepDepth of 2
+          break;
+        case 3:
+          //do something for sleepDepth of 3
+          break;
+        case 4:
+          //do something for sleepDepth of 4
+          break;
+        case 5:
+          //do something for sleepDepth of 5
+          break;
+        default:
+          // default case
+          break;        
+      }
+    }  
+  }
 }
 
 void votingArray(){
@@ -182,3 +285,111 @@ void clearArray(char* a, int n){
     a[i] = '\0';
   } 
 }
+
+/*
+  Helper functions for Trilium Core to carry out its operations
+*/
+
+//checks which sleep mode to go into, checked periodically with main loop
+int chooseSleepMode(){
+  //things to verify:
+  //get how much power is availble to determine which sleep mode to go into
+  
+  
+  
+  /*
+    TODO: FIX THE LOGIC FOR THE CONDIITONAL STATEMENTS HERE, if(1) means first statement will ALWAYS execute and all other logic is IGNORED...
+  */
+  //first mode 
+  if(1){
+    setSleepMode(1);
+    return sleepDepth;  
+  }
+
+  //second mode
+  else if(2){
+    setSleepMode(2);
+    return sleepDepth;
+  }  
+
+  //thrid mode
+  else if(3){
+    setSleepMode(3);
+    return sleepDepth;
+  }  
+
+  //fourth mode
+  else if(4){
+    setSleepMode(4);
+    return sleepDepth;
+  }
+
+  else if (5){
+    setSleepMode(5);
+    return sleepDepth;
+  }
+  else{
+    setSleepMode(0);
+    return sleepDepth;
+  }  
+}
+
+
+//sync the trillium chips upon a restart
+void startUpSync(){
+  digitalWrite(chipRestart, HIGH); 
+}
+
+
+//resets the OS cycle number, restarting the OS cycle
+void resetOSCycle(){
+  OSCycle = 0;
+}
+
+//wakes the core, starts the OSCycle again
+void wakeCore(){
+  sleep_disable();   
+  sleepMode = false; 
+  startUpSync();
+}
+
+//setting sleepMode
+void setSleepMode(int a){
+  //case where you don't need to sleep
+  if (a == 0){
+    sleepDepth = 0;
+    sleepMode = false;
+    return;
+  }
+  else if (a == 1){
+    sleepDepth = 1;
+    set_sleep_mode(SLEEP_MODE_IDLE);
+  }
+  else if (a == 2){
+    sleepDepth = 2;
+    set_sleep_mode(SLEEP_MODE_ADC);
+  }
+  else if (a == 3){
+    sleepDepth = 3;
+    set_sleep_mode(SLEEP_MODE_PWR_SAVE);
+  }
+  else if (a == 4){
+    sleepDepth = 4;
+    set_sleep_mode(SLEEP_MODE_STANDBY);
+  }
+  else if (a == 5){
+    sleepDepth = 5;
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+  }  
+  sleep_enable();
+  sleep_mode();
+  sleepMode = true;   //sleepMode is on
+}
+
+
+//internal interrupt methods  stub
+
+void T3interrupt(){
+  //fn calls to various methods that need to be called regularly - still need to determine  
+}
+
