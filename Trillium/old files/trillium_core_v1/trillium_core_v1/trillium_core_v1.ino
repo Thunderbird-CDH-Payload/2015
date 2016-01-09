@@ -35,15 +35,7 @@ Software for controlling radiation redundency in the Trillium architechture. Cod
 const int chipRestart = 4; //sends out call for reset of other chip os cycles
 int resetOSCyclePin = 2; //recieve pin of interupt to reset chip os cycle  //change pin of this
 int wakeCorePin = 8; //jump wake external interupt for exiting sleep mode //call this when battery is good //changed pin number
-int input=5; //temporary input value for voting array pin
-int comAC=2; //compared value of A and C
-int comAB=3; //compared value of A and B
 
-//read from core from serial port of other two core
-//data array from different boards
-int Bdata[32]; //change length later
-int Cdata[32];
-int Adata[32];
 
 
 
@@ -67,9 +59,6 @@ void setup(){
   pinMode(resetOSCyclePin, INPUT);
   pinMode(wakeCorePin, INPUT);
   
-  pinMode(input,INPUT);  //input to this core
-  pinMode(comAC,INPUT);  //input to nand for C
-  pinMode(comAB,INPUT);  //input to nand for B  
   
 //external interupt reset os loop
   attachInterrupt(digitalPinToInterrupt(resetOSCyclePin), resetOSCycle, FALLING);
@@ -81,8 +70,7 @@ void setup(){
   Timer3.initialize();
   
 //serial comms startup
-  Serial1.begin(28800); //comms to other core
-  Serial2.begin(28800); //comms to other core
+ 
   
 //Internal interrupts
   Timer1.attachInterrupt(startUpSync);  //sync them 
@@ -247,96 +235,8 @@ void T3interrupt(){
 //voting array
 int voteingArray(){
 
-//reading value of A from digitalPin while theres something to read
-int a=0;
-  while (digitalRead(input)){
-    
-    if(digitalRead(input)==-1)
-      break;
-      else{
-    Adata[a]=digitalRead(input);
-    //write this value to the other boards
-    
-    
-    a++;}     
-    }
-
-delay(200);
-//writes this boards data to other boards
-
-writeB();
-writeC();
-delay(200);
-
-
-    
-//reading B from serial
-if (Serial1.available() > 0){ 
-  int bAvail=Serial1.available();
-  for(int i=0; i<bAvail; i++){
-    Bdata[i] = Serial1.read();}           
-   }
-                            
-//reading C from serial
-if (Serial2.available() > 0){ // Don't read unless
-  int cAvail=Serial2.available();
-  for(int i=0; i<cAvail; i++){
-   Cdata[i] = Serial2.read();}
-   }
-
-delay(200);
-
-//comparing A and B's data
-int j=0;
-int AB;
-while(j<32){
-  if (Adata[j]==Bdata[j]){
-    AB=0;}
-    else{AB=1;
-    j=0;
-    break;}
-    j++;
-  }
-
-//comparing A and C's data
-int f=0;
-int AC;
-while(f<32){
-  if (Adata[f]==Cdata[f]){
-    AC=0;}
-    else{AC=1;
-    break;}
-    f++;
-  }
-
-//sending vote for B
-digitalWrite(AB,comAB);
-//sending vote for C
-digitalWrite(AC,comAC);  
-//resetting done by hardware
 
   }
-
-
-//A writes to B
-void writeB(){
-  int i=0;
-  while (i<32){    
-      Serial1.write(Adata[i]);
-      i++;
-      }}
-
-//A writes to C
-void writeC(){
-  int i=0;
-  while (i<32){    
-      Serial2.write(Adata[i]);
-      i++;
-      }}
-
- 
- 
-int compareString
   
 
 
