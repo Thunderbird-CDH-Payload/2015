@@ -30,6 +30,8 @@ Software for controlling radiation redundency in the Trillium architechture. Cod
 #include "avr/power.h"
 #include "avr/sleep.h"
 
+//***VOTING FN USE
+
 #define TRUE 1
 #define FALSE 0
 
@@ -66,6 +68,8 @@ char Cdata[BUFFER_SIZE];
 
 int ac = 0;
 int ab = 0;
+
+//***VOTING FN USE
 
 //variables for general system use
 volatile int OSCycle = 0; //number of cycles of the OS, keeps things running in check, allows for synchronized reset
