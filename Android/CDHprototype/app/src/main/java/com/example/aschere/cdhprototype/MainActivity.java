@@ -17,9 +17,6 @@ import java.util.Iterator;
 
 public class MainActivity extends AppCompatActivity
 {
-
-	//TODO: Everything
-
 	private static final int ARDUINO_USB_VENDOR_ID = 0x2341; //might need to change to Chinese id
 	private static final int fun_id = 0x000;
 	private Boolean mIsReceiving;

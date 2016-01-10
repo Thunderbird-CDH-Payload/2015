@@ -9,13 +9,14 @@ package com.example.aschere.cdhprototype;
  * ARDUINO team, decide the codes.
  */
 public enum negotiationCode
-{
+{ //TODO: the function ids that the arduino wants
 	//note: all should be in byte[] format
 	SENDING_START(new byte[] {(byte)0x00, (byte)0x00, (byte)0x00, (byte)0x01}),
 	SENDING_END(new byte[] {(byte)0x00, (byte)0x00, (byte)0x01, (byte)0x00}),
 	RECEIVING(new byte[] {(byte)0x00, (byte)0x01, (byte)0x00, (byte)0x00}),
 	GET_FUN_ID(new byte[] {(byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00}),
-	GET_ORDERS(new byte[] {(byte)0x01, (byte)0x00, (byte)0x00, (byte)0x00});
+	GET_ORDERS(new byte[] {(byte)0x01, (byte)0x00, (byte)0x00, (byte)0x00}),
+	MORE_FUN(new byte[] {(byte)0x01, (byte)0x00, (byte)0x00, (byte)0x01});
 
 	private byte[] code;
 	negotiationCode(byte[] enumCode)
