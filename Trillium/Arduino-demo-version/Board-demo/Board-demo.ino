@@ -50,6 +50,7 @@ Software for controlling radiation redundency in the Trillium architechture. Cod
 // e.g. "AA0000000000000Z" in this case
 #define CHAR1 'A'
 #define CHAR2 'A'
+#define 2ND_END_CHAR 'Y' //must be different than END_CHAR
 #define END_CHAR 'Z'
 
 //Pin declarations here
