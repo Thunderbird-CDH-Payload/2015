@@ -1,7 +1,7 @@
 //Main demo version
 //Based on user input send data to three boards and have them send back what they received
 
-
+#define WAIT_TIME 1000
 #define BUFFER_SIZE 64
 char msg[BUFFER_SIZE];
 char Adata[BUFFER_SIZE];
@@ -25,9 +25,10 @@ void setup() {
 
 void loop() {
     if(Serial.available()>0){
-      Serial.print("in loop");
+      Serial.print("in loop\n");
+      delay(WAIT_TIME);
         readInput();
-        Serial.print("done reading input");
+        Serial.print("done reading input\n");
         sendInput();
       Serial.println("Main's message: \n");
       Serial.println(msg);
