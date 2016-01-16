@@ -28,5 +28,6 @@ public class MainActivity extends AppCompatActivity
 		// communication
 		sendingIntent.putExtra("primavera.arduino.intent.extra.DATA", byteArray);
 		this.getApplicationContext().sendBroadcast(sendingIntent);
+		return true;
 	}
 }

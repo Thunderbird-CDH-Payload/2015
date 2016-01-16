@@ -12,9 +12,17 @@ public class BootUpReceiver extends BroadcastReceiver
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		Intent i = new Intent(context, MainActivity.class);  //MyActivity can be anything which you want to start on bootup...
-		i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		context.startActivity(i);
+		//Code copied from http://www.khurramitdeveloper.blogspot.ca/2013/06/start-activity-or-service-on-boot.html
+		// TODO: This method is called when the BroadcastReceiver is receiving
+
+		// Start Service On Boot Start Up
+		//Intent service = new Intent(context, TestService.class);
+		//context.startService(service);
+
+		//Start App On Boot Start Up
+		Intent App = new Intent(context, MainActivity.class);
+		App.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		context.startActivity(App);
 	}
 
 }
