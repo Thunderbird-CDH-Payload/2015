@@ -73,6 +73,7 @@ void receiveResponse(){
         //loop around till theres something to read from all of them
         //still gotta take of the case where a board didnt get anything or failed to send back - should add some sort of timer **
     }
+    delay(WAIT_TIME);
     readA();
     readB();
     readC();  

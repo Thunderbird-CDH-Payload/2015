@@ -295,7 +295,7 @@ void sendDataToMain(){
   int i=0;
     while(i<BUFFER_SIZE){
         if (!(Adata[i]==NULL)){
-            Serial1.print(Adata[i]);
+            Serial2.print(Adata[i]);
             i++;}
         else {break;}
     }
