@@ -2,7 +2,7 @@
 //Based on user input send data to three boards and have them send back what they received
 
 
-int BUFFER_SIZE = 64;
+#define BUFFER_SIZE 64
 char msg[BUFFER_SIZE];
 char Adata[BUFFER_SIZE];
 char Bdata[BUFFER_SIZE];
@@ -24,7 +24,7 @@ void setup() {
 }
 
 void loop() {
-    if(Serial.available>0){
+    if(Serial.available()>0){
         readInput();
         sendInput();
       Serial.println("Main's message: \n");
@@ -43,7 +43,7 @@ void readInput(){
     int i=0;
     while (i<BUFFER_SIZE){
         if (Serial.available()>0){
-            msg[i]=Serial.read;
+            msg[i]=Serial.read();
             i++;   //only increase i when its read something
         }
     }
@@ -54,7 +54,7 @@ void sendInput(){
     Serial1.print("AA");  //indicates to boards that its the start of the msg
     int i=0;
     while(i<BUFFER_SIZE){
-        if (!(msg[i]=="\0")){
+        if (!(msg[i]==NULL)){
             Serial1.print(msg[i]);
             i++;}
         else {break;}
@@ -64,7 +64,7 @@ void sendInput(){
 }
 
 void receiveResponse(){
-    while !((Serial1.available()>0) && (Serial2.available()>0) && (Serial3.available()>0)){
+    while (!((Serial1.available()>0) && (Serial2.available()>0) && (Serial3.available()>0))){
         //loop around till theres something to read from all of them
         //still gotta take of the case where a board didnt get anything or failed to send back - should add some sort of timer **
     }
@@ -90,7 +90,7 @@ void readA(){
     int i=0;
     while (i<BUFFER_SIZE){
         if (Serial1.available()>0){
-            Adata[i]=Serial1.read;
+            Adata[i]=Serial1.read();
             i++;
         }
     }
@@ -100,7 +100,7 @@ void readB(){
     int i=0;
     while (i<BUFFER_SIZE){
         if (Serial2.available()>0){
-            Bdata[i]=Serial2.read;
+            Bdata[i]=Serial2.read();
             i++;
         }
     }
@@ -110,7 +110,7 @@ void readC(){
     int i=0;
     while (i<BUFFER_SIZE){
         if (Serial3.available()>0){
-            Cdata[i]=Serial3.read;
+            Cdata[i]=Serial3.read();
             i++;
         }
     }
@@ -123,6 +123,6 @@ void clearArray(char* a, int n){
 }
 
     
-}
+
 
 
