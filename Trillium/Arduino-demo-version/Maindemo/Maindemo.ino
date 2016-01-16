@@ -27,8 +27,15 @@ void loop() {
     if(Serial.available>0){
         readInput();
         sendInput();
+      Serial.println("Main's message: \n");
+      Serial.println(msg);
         receiveResponse(); //might need to include timer here **check after testing if needed
         outputResponse();
+        
+      clearArray(msg,BUFFER_SIZE);
+      clearArray(Adata,BUFFER_SIZE);
+      clearArray(Bdata,BUFFER_SIZE);
+      clearArray(Cdata,BUFFER_SIZE);
     }
 }
 
@@ -42,16 +49,17 @@ void readInput(){
     }
 }
 
+//needed only once cause theyll be connected by the same line
 void sendInput(){
-    Serial.print("AA");  //indicates to boards that its the start of the msg
+    Serial1.print("AA");  //indicates to boards that its the start of the msg
     int i=0;
     while(i<BUFFER_SIZE){
         if (!(msg[i]=="\0")){
-            Serial.print(msg[i]);
+            Serial1.print(msg[i]);
             i++;}
         else {break;}
     }
-    Serial.print("ZZ");  //indicates to boards that its the end of the msg 
+    Serial1.print("ZZ");  //indicates to boards that its the end of the msg 
     
 }
 
@@ -62,12 +70,19 @@ void receiveResponse(){
     }
     readA();
     readB();
-    readC();
+    readC();  
+    
 }
 
+//**change depending on how boards response smg will be formated
 void outputResponse(){
+    Serial.println("Response from A: \n");
     Serial.println(Adata);
+   
+    Serial.println("Response from B: \n");
     Serial.println(Bdata);
+    
+    Serial.println("Response from C: \n");
     Serial.println(Cdata);
 }
 
@@ -100,6 +115,14 @@ void readC(){
         }
     }
 }
+
+void clearArray(char* a, int n){
+  for(int i = 0; i < n; i++){
+    a[i] = '\0';
+  } 
+}
+
     
 }
+
 
