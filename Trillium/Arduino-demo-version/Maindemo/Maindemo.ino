@@ -33,6 +33,7 @@ void loop() {
       Serial.println("Main's message: \n");
       Serial.println(msg);
         receiveResponse(); //might need to include timer here **check after testing if needed
+        Serial.print("done receiving response");
         outputResponse();
         
       clearArray(msg,BUFFER_SIZE);
@@ -97,6 +98,7 @@ void readA(){
             Adata[i]=Serial1.read();
             i++;
         }
+        else{break;}
     }
 }
 
@@ -107,6 +109,7 @@ void readB(){
             Bdata[i]=Serial2.read();
             i++;
         }
+        else {break;}
     }
 }
 
@@ -117,6 +120,7 @@ void readC(){
             Cdata[i]=Serial3.read();
             i++;
         }
+        else {break;}
     }
 }
 

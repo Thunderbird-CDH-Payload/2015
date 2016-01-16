@@ -221,7 +221,7 @@ int getSignalData(){
   if (Adata[0] == CHAR1 && Adata[1] == CHAR2){
     Serial.print("Got Data from main: ");
     Serial.println(Adata); //printing to screen
-    Serial2.print(Adata); //SENDING TO MAIN
+    sendDataToMain(); //SENDING TO MAIN 
     return TRUE;
   }
   return FALSE;
@@ -290,6 +290,16 @@ void clearArray(char* a, int n){
     a[i] = '\0';
   } 
 }
+
+void sendDataToMain(){
+  int i=0;
+    while(i<BUFFER_SIZE){
+        if (!(Adata[i]==NULL)){
+            Serial1.print(Adata[i]);
+            i++;}
+        else {break;}
+    }
+  }
 
 /*
   Helper functions for Trilium Core to carry out its operations
