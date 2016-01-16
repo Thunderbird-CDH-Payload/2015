@@ -25,7 +25,9 @@ void setup() {
 
 void loop() {
     if(Serial.available()>0){
+      Serial.print("in loop");
         readInput();
+        Serial.print("done reading input");
         sendInput();
       Serial.println("Main's message: \n");
       Serial.println(msg);
@@ -46,6 +48,7 @@ void readInput(){
             msg[i]=Serial.read();
             i++;   //only increase i when its read something
         }
+        else {break;}
     }
 }
 
