@@ -5,7 +5,7 @@ This repo contains the code for UBC Orbit's triple redundancy Trillium main proc
 Android phone that we will have on the satellite. 
 
 # Android App
--Will run on boot
+-Will run on boot (Thanks http://www.khurramitdeveloper.blogspot.ca/)  
 -Uses Intents for IPC with Arduino Communicator
 
 # For communicating with Arduino (Android)
