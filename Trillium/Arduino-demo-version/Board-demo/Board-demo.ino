@@ -81,10 +81,10 @@ const int OSCycleCap = 10000; //number of OS cycles before roll-over
 
 
 void setup() {
-  Serial.begin(SERIAL_RATE);  
-  Serial1.begin(SERIAL_RATE);
-  Serial2.begin(SERIAL_RATE);
-  Serial3.begin(SERIAL_RATE);
+  Serial.begin(SERIAL_RATE);    //MAIN COMM BACK AND FORTH
+  Serial1.begin(SERIAL_RATE);   //TRANSMISSION TO OTHERS
+  Serial2.begin(SERIAL_RATE);   //TX TO ONE
+  Serial3.begin(SERIAL_RATE);   //TX TO OTHER ONE
 
   pinMode(Breset, OUTPUT);
   pinMode(Creset, OUTPUT);
@@ -178,13 +178,13 @@ void votingArray(){
     
     // compare data with arduino B
     ab = different(Adata, Bdata, BUFFER_SIZE);
-    Serial.print("AB Compare: ");
-    Serial.println(ab);
+    //Serial.print("AB Compare: ");
+    //Serial.println(ab);
     
     // compare data with arduino C
     ac = different(Adata, Cdata, BUFFER_SIZE);
-    Serial.print("AC Compare: ");
-    Serial.println(ac);   
+    //Serial.print("AC Compare: ");
+    //Serial.println(ac);   
     
     // if there is a difference between the data received from the other arduions, trigger reset logic
     if (ab){
@@ -208,19 +208,19 @@ int getSignalData(){
   delay(WAIT_TIME);
   clearArray(Adata, BUFFER_SIZE);
   int m=0;
-  while(Serial1.available() > 0){
-    char temp = Serial1.read();
+  while(Serial.available() > 0){
+    char temp = Serial.read();
     Adata[m] = temp;
     m++;
     if (temp == END_CHAR)
       break;
   }
-  Serial1.flush();
+  Serial.flush();
   Adata[m]='\0';
   // Adata[4] = 'B';
   if (Adata[0] == CHAR1 && Adata[1] == CHAR2){
-    Serial.print("Got Data from main: ");
-    Serial.println(Adata); //printing to screen
+//    Serial.print("Got Data from main: ");
+    Serial.println(Adata); //SEND TO MAIN
     return TRUE;
   }
   return FALSE;
@@ -245,8 +245,8 @@ int readB(){
   Serial2.flush();
   Bdata[m]='\0';
   if (Bdata[0] == CHAR1 && Bdata[1] == CHAR2){
-    Serial.print("Got Data from B: ");
-    Serial.println(Bdata); //printing to screen
+//    Serial.print("Got Data from B: ");
+//    Serial.println(Bdata); //printing to screen
     return TRUE;
   }
   return FALSE;
@@ -267,8 +267,8 @@ int readC(){
   Serial3.flush();
   Cdata[m]='\0';
   if (Cdata[0] == CHAR1 && Cdata[1] == CHAR2){
-    Serial.print("Got Data from C: ");
-    Serial.println(Cdata); //printing to screen
+//    Serial.print("Got Data from C: ");
+//    Serial.println(Cdata); //printing to screen
     return TRUE;
   }
   return FALSE;
