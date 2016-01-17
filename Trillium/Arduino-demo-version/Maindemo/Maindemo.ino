@@ -3,6 +3,8 @@
 
 #define WAIT_TIME 1000
 #define BUFFER_SIZE 64
+char errMode;
+
 char msg[BUFFER_SIZE];
 char Adata[BUFFER_SIZE];
 char Bdata[BUFFER_SIZE];
@@ -28,13 +30,17 @@ void loop() {
       Serial.print("in loop\n");
       delay(WAIT_TIME);
         readInput();
+        errMode=msg[0];  //indicates if its in error mode
         Serial.print("done reading input\n");
         sendInput();
       Serial.println("Main's message: \n");
       Serial.println(msg);
         receiveResponse(); //might need to include timer here **check after testing if needed
         Serial.print("done receiving response");
-        outputResponse();
+        if (errMode=='E'){
+          outputErrRes();}
+          else {
+        outputResponse();}
         
       clearArray(msg,BUFFER_SIZE);
       clearArray(Adata,BUFFER_SIZE);
@@ -130,6 +136,24 @@ void clearArray(char* a, int n){
     a[i] = '\0';
   } 
 }
+
+void outputErrRes(){
+  if (Adata[1]>0){
+    Serial.print("A board got error:\n");
+    Serial.print(Adata[1]);}
+    else {
+      Serial.print("A is in normal mode");}
+  if (Bdata[1]>0){
+    Serial.print("B board got error:\n");
+    Serial.print(Bdata[1]);}
+    else {
+      Serial.print("B is in normal mode");}
+  if (Cdata[1]>0){
+    Serial.print("C board got error:\n");
+    Serial.print(Cdata[1]);}
+    else {
+      Serial.print("C is in normal mode");}
+  }
 
     
 

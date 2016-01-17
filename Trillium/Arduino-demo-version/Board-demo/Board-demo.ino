@@ -178,7 +178,6 @@ void votingArray(){
     
     // if you dont want to operate in error mode, just comment out this line:
     checkError();
-
     sendDataToMain(); //SENDING TO MAIN 
     
     // write the received data from host to the other 2 Arduinos
@@ -306,6 +305,10 @@ void clearArray(char* a, int n){
 }
 
 void sendDataToMain(){
+  if (errmode>0){
+    Serial2.print(ARDUINO_ID);
+    Serial2.print(errmode);}
+    else{
   int i = 0;
     while(i < BUFFER_SIZE){
       if (Adata[i] != NULL){
@@ -314,6 +317,7 @@ void sendDataToMain(){
       }
       else
         break;
+    }
     }
   }
 
