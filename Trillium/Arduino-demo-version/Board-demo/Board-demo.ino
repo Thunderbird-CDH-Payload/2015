@@ -57,8 +57,10 @@ Software for controlling radiation redundency in the Trillium architechture. Cod
 #define END_CHAR 'Z'
 
 //*** ERROR FN USE
-int errmode = 0;
+int errMode=FALSE;
+int errNum = 0;
 int errbit = 0;
+
 
 //Pin declarations here
 const int chipRestart = 4; //sends out call for reset of other chip os cycles
@@ -174,12 +176,14 @@ void votingArray(){
   clearArray(Cdata, BUFFER_SIZE);
   
   // check if there is serial data that has been received from the host
-  if (getSignalData()){
-    
+  if (getSignalData()){    
     // if you dont want to operate in error mode, just comment out this line:
     checkError();
-    sendDataToMain(); //SENDING TO MAIN 
     
+    if (errNum > 0)
+    simulateError(errNum);
+            
+    if (!errMode){    
     // write the received data from host to the other 2 Arduinos
     writeOthers();
     delay(WAIT_TIME);
@@ -212,7 +216,12 @@ void votingArray(){
     // drive reset pins back low
     digitalWrite(Breset, LOW);
     digitalWrite(Creset, LOW);
-  } 
+  }
+  sendDataToMain(); //SENDING TO MAIN  
+
+  
+  }
+  
 }
 
 // this function reads the data from the host
@@ -305,10 +314,10 @@ void clearArray(char* a, int n){
 }
 
 void sendDataToMain(){
-  if (errmode>0){
     Serial2.print(ARDUINO_ID);
-    Serial2.print(errmode);}
-    else{
+    Serial2.print(errNum);
+
+  if (!errMode){
   int i = 0;
     while(i < BUFFER_SIZE){
       if (Adata[i] != NULL){
@@ -318,8 +327,11 @@ void sendDataToMain(){
       else
         break;
     }
+    //send its vote to main
+    Serial2.print(ab);
+    Serial2.print(ac);}
     }
-  }
+  
 
 /*
   Helper functions for Trilium Core to carry out its operations
@@ -434,7 +446,7 @@ void T3interrupt(){
 }
 
 // *** ERROR FUNCTIONS ***
-
+//only changes data recevied from host
 void simulateError(int e){
   switch(e) {
     case 1:
@@ -459,9 +471,10 @@ void simulateError(int e){
 
 void checkError(){
   if (Adata[2] == 'E'){
-    errmode = (int) Adata[2 + ARDUINO_ID] - '0';
+    errMode=TRUE;    //indicates to fn in error mode
+    errNum = (int) Adata[2 + ARDUINO_ID] - '0';
     errbit = (int) Adata[6];
   }
-  if (errmode > 0)
-    simulateError(errmode);
+  else {errMode=FALSE;} //means just a regular msg is being sent 'normal mode'
+  
 }
