@@ -30,10 +30,11 @@ Software for controlling radiation redundency in the Trillium architechture. Cod
 #include "avr/power.h"
 #include "avr/sleep.h"
 
-#define ARDUINO_ID 1;
+//*** CHANGE THIS NUMBER BEFORE UPLOADING SKETCH ***
+#define ARDUINO_ID 1
 
 //***VOTING FN USE
-int errorMode=0;
+
 #define TRUE 1
 #define FALSE 0
 
@@ -52,7 +53,12 @@ int errorMode=0;
 // e.g. "AA0000000000000Z" in this case
 #define CHAR1 'A'
 #define CHAR2 'A'
+#define SECOND_CHAR 'Y' // this must be different than END_CHAR
 #define END_CHAR 'Z'
+
+//*** ERROR FN USE
+int errmode = 0;
+int errbit = 0;
 
 //Pin declarations here
 const int chipRestart = 4; //sends out call for reset of other chip os cycles
@@ -169,7 +175,10 @@ void votingArray(){
   
   // check if there is serial data that has been received from the host
   if (getSignalData()){
-    sendDataToMain(); //SENDING TO MAIN 
+    
+    // if you dont want to operate in error mode, just comment out this line:
+    checkError();
+    
     // write the received data from host to the other 2 Arduinos
     writeOthers();
     delay(WAIT_TIME);
@@ -220,10 +229,11 @@ int getSignalData(){
   Serial1.flush();
   Adata[m]='\0';
   
+  // Adata[4] = 'B';
   if (Adata[0] == CHAR1 && Adata[1] == CHAR2){
     Serial.print("Got Data from main: ");
     Serial.println(Adata); //printing to screen
-    //checkIfErrorMode();
+    sendDataToMain(); //SENDING TO MAIN 
     return TRUE;
   }
   return FALSE;
@@ -294,17 +304,16 @@ void clearArray(char* a, int n){
 }
 
 void sendDataToMain(){
-  int i=0;
-    while(i<BUFFER_SIZE){
-        if (!(Adata[i]==NULL)){
-            Serial2.print(Adata[i]);
-            i++;}
-        else {break;}
+  int i = 0;
+    while(i < BUFFER_SIZE){
+      if (Adata[i] != NULL){
+        Serial2.print(Adata[i]);
+        i++;
+      }
+      else
+        break;
     }
   }
-
-void checkIfErrorMode(){
-  };
 
 /*
   Helper functions for Trilium Core to carry out its operations
@@ -418,3 +427,35 @@ void T3interrupt(){
   //fn calls to various methods that need to be called regularly - still need to determine  
 }
 
+// *** ERROR FUNCTIONS ***
+
+void simulateError(int e){
+  switch(e) {
+    case 1:
+      Serial.println("Bit flip");
+      break;
+    case 2:
+      Serial.println("Arithmetic");
+      break;
+    case 3:
+      Serial.println("Latch-up");
+      break;
+    case 4:
+      Serial.println("Random");
+      break;
+    default:
+      Serial.println("Invalid errorcode");
+      break;
+  }
+  Serial.print("Error bit: ");
+  Serial.println(errbit);
+}
+
+void checkError(){
+  if (Adata[2] == 'E'){
+    errmode = (int) Adata[2 + ARDUINO_ID] - '0';
+    errbit = (int) Adata[6];
+  }
+  if (errmode > 0)
+    simulateError(errmode);
+}
