@@ -30,8 +30,10 @@ Software for controlling radiation redundency in the Trillium architechture. Cod
 #include "avr/power.h"
 #include "avr/sleep.h"
 
-//***VOTING FN USE
+#define ARDUINO_ID 1;
 
+//***VOTING FN USE
+int errorMode=0;
 #define TRUE 1
 #define FALSE 0
 
@@ -167,7 +169,7 @@ void votingArray(){
   
   // check if there is serial data that has been received from the host
   if (getSignalData()){
-    
+    sendDataToMain(); //SENDING TO MAIN 
     // write the received data from host to the other 2 Arduinos
     writeOthers();
     delay(WAIT_TIME);
@@ -217,11 +219,11 @@ int getSignalData(){
   }
   Serial1.flush();
   Adata[m]='\0';
-  // Adata[4] = 'B';
+  
   if (Adata[0] == CHAR1 && Adata[1] == CHAR2){
     Serial.print("Got Data from main: ");
     Serial.println(Adata); //printing to screen
-    sendDataToMain(); //SENDING TO MAIN 
+    //checkIfErrorMode();
     return TRUE;
   }
   return FALSE;
@@ -300,6 +302,9 @@ void sendDataToMain(){
         else {break;}
     }
   }
+
+void checkIfErrorMode(){
+  };
 
 /*
   Helper functions for Trilium Core to carry out its operations
