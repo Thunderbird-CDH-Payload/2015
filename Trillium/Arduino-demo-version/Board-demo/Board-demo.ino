@@ -31,7 +31,7 @@ Software for controlling radiation redundency in the Trillium architechture. Cod
 #include "avr/sleep.h"
 
 //*** CHANGE THIS NUMBER BEFORE UPLOADING SKETCH ***
-#define ARDUINO_ID 3
+#define ARDUINO_ID 2
 
 //***VOTING FN USE
 
@@ -79,6 +79,8 @@ char Cdata[BUFFER_SIZE];
 int ac = 0;
 int ab = 0;
 
+long randNum;
+
 //***VOTING FN USE
 
 //variables for general system use
@@ -91,6 +93,8 @@ const int OSCycleCap = 10000; //number of OS cycles before roll-over
 
 
 void setup() {
+  randomSeed(100);  //random number generator 
+  
   Serial.begin(SERIAL_RATE);  
   Serial1.begin(SERIAL_RATE);
   Serial2.begin(SERIAL_RATE);
@@ -180,11 +184,16 @@ void votingArray(){
     // if you dont want to operate in error mode, just comment out this line:
     checkError();
     
-    if (errMode == TRUE) {
+    if (errbit>0 && !(errMode)) {
       simulateError(errNum);
+<<<<<<< HEAD
+    }    
+=======
     }
-            
-    else {    
+
+    if(!errMode){           
+       
+>>>>>>> 9470cfcc648b60822a0e32a79ce8002f24dc583f
       // write the received data from host to the other 2 Arduinos
       writeOthers();
       delay(WAIT_TIME);
@@ -196,11 +205,15 @@ void votingArray(){
       // compare data with arduino B
       ab = different(Adata, Bdata, BUFFER_SIZE);
       Serial.print("AB Compare: ");
+      Serial.print(Bdata);
+      Serial.print("\n");
       Serial.println(ab);
       
       // compare data with arduino C
       ac = different(Adata, Cdata, BUFFER_SIZE);
       Serial.print("AC Compare: ");
+       Serial.print(Cdata);
+      Serial.print("\n");
       Serial.println(ac);   
       
       // if there is a difference between the data received from the other arduions, trigger reset logic
@@ -216,8 +229,13 @@ void votingArray(){
       
       // drive reset pins back low
       digitalWrite(Breset, LOW);
+<<<<<<< HEAD
       digitalWrite(Creset, LOW);
-    }
+      
+=======
+      digitalWrite(Creset, LOW);}
+    
+>>>>>>> 9470cfcc648b60822a0e32a79ce8002f24dc583f
     sendDataToMain(); //SENDING TO MAIN  
 
   
@@ -317,10 +335,9 @@ void clearArray(char* a, int n){
 void sendDataToMain(){
     Serial2.print(ARDUINO_ID);
     Serial2.print(errNum);
+    Serial.print("Arduino id and errnum:");
     Serial.print(ARDUINO_ID);
-    Serial.print("\n");
-    Serial.print(errNum);
-    Serial.print("\n");
+    Serial.println(errNum);
 
   if (!errMode){
   int i = 0;
@@ -333,7 +350,7 @@ void sendDataToMain(){
         break;
     }
     //send its vote to main
-    Serial2.print("AB and AC vote: ");
+    Serial2.print(" AB and AC vote:");
     Serial2.print(ab);
     Serial2.println(ac);
   }
@@ -456,8 +473,6 @@ void T3interrupt(){
 //only changes data recevied from host
 //INPUT=type of error
 void simulateError(int e){
-  int rand=1;
-  rand=rand % 3;
   switch(e) {
     case 1:
       Adata[errbit]=~(Adata[errbit]);
@@ -470,8 +485,8 @@ void simulateError(int e){
       break;
     case 3:
       Serial.println("Random");
-      rand++;
-      simulateError(rand);      
+      randNum=(random(300) % 3) + 1;  //covers all cases
+      simulateError(randNum);      
       break;
     default:
       Serial.println("Invalid errorcode");
@@ -485,7 +500,7 @@ void checkError(){
   if (Adata[2] == 'E'){
     errMode = TRUE;    //indicates to fn in error mode
     errNum = (int) Adata[2 + ARDUINO_ID] - '0';
-    errbit = (int) Adata[6];
+    errbit = (int) Adata[6] - 32;
   }
   else {
     errMode = FALSE; //means just a regular msg is being sent 'normal mode'

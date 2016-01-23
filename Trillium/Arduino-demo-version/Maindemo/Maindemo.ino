@@ -11,6 +11,7 @@ char Bdata[BUFFER_SIZE];
 char Cdata[BUFFER_SIZE];
 
 void setup() {
+  randomSeed(analogRead(0));
     Serial.begin(115200);
     while(!Serial){ //waiting for serial to connect
     }
@@ -26,6 +27,7 @@ void setup() {
 }
 
 void loop() {
+  
     if(Serial.available()>0){
       Serial.print("in loop\n");
       delay(WAIT_TIME);
@@ -75,9 +77,12 @@ void sendInput(){
 }
 
 void receiveResponse(){
-    while (!((Serial1.available()>0) && (Serial2.available()>0) && (Serial3.available()>0))){
+    int i;
+    while (!((Serial1.available()>0) && (Serial2.available()>0) && (Serial3.available()>0)) && i < 500){
         //loop around till theres something to read from all of them
         //still gotta take of the case where a board didnt get anything or failed to send back - should add some sort of timer **
+        delay(1);
+        i++;
     }
     delay(WAIT_TIME);
     readA();
@@ -90,12 +95,15 @@ void receiveResponse(){
 void outputResponse(){
     Serial.println("Response from A: \n");
     Serial.println(Adata);
+    Serial.print("\n");
    
     Serial.println("Response from B: \n");
     Serial.println(Bdata);
+    Serial.print("\n");
     
     Serial.println("Response from C: \n");
     Serial.println(Cdata);
+    Serial.print("\n");
 }
 
 void readA(){
