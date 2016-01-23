@@ -36,7 +36,7 @@ void loop() {
       Serial.println("Main's message: \n");
       Serial.println(msg);
         receiveResponse(); //might need to include timer here **check after testing if needed
-        Serial.print("done receiving response");
+        Serial.print("done receiving response\n");
         if (errMode=='E'){
           outputErrRes();}
           else {
