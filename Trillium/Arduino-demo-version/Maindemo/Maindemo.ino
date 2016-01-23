@@ -11,6 +11,7 @@ char Bdata[BUFFER_SIZE];
 char Cdata[BUFFER_SIZE];
 
 void setup() {
+  randomSeed(analogRead(0));
     Serial.begin(115200);
     while(!Serial){ //waiting for serial to connect
     }
@@ -26,6 +27,7 @@ void setup() {
 }
 
 void loop() {
+  
     if(Serial.available()>0){
       Serial.print("in loop\n");
       delay(WAIT_TIME);
