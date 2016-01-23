@@ -95,12 +95,15 @@ void receiveResponse(){
 void outputResponse(){
     Serial.println("Response from A: \n");
     Serial.println(Adata);
+    Serial.print("\n");
    
     Serial.println("Response from B: \n");
     Serial.println(Bdata);
+    Serial.print("\n");
     
     Serial.println("Response from C: \n");
     Serial.println(Cdata);
+    Serial.print("\n");
 }
 
 void readA(){

@@ -336,7 +336,7 @@ void sendDataToMain(){
         break;
     }
     //send its vote to main
-    Serial2.print("AB and AC vote: ");
+    Serial2.print(" AB and AC vote:");
     Serial2.print(ab);
     Serial2.println(ac);
   }
