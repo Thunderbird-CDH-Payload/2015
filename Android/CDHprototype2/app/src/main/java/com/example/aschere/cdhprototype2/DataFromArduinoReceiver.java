@@ -23,6 +23,12 @@ public class DataFromArduinoReceiver extends BroadcastReceiver
 			case 0x02:
 				break;
 		}*/
+
+		//start the main activity
+		Intent App = new Intent(context, MainActivity.class);
+		App.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		context.startActivity(App);
+
 		displayReceivedData(receivedData);
 	}
 
