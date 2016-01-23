@@ -180,44 +180,45 @@ void votingArray(){
     // if you dont want to operate in error mode, just comment out this line:
     checkError();
     
-    if (errNum > 0)
-    simulateError(errNum);
+    if (errMode == TRUE) {
+      simulateError(errNum);
+    }
             
-    if (!errMode){    
-    // write the received data from host to the other 2 Arduinos
-    writeOthers();
-    delay(WAIT_TIME);
-    
-    // read data from other 2 arduinos
-    readB();
-    readC();
-    
-    // compare data with arduino B
-    ab = different(Adata, Bdata, BUFFER_SIZE);
-    Serial.print("AB Compare: ");
-    Serial.println(ab);
-    
-    // compare data with arduino C
-    ac = different(Adata, Cdata, BUFFER_SIZE);
-    Serial.print("AC Compare: ");
-    Serial.println(ac);   
-    
-    // if there is a difference between the data received from the other arduions, trigger reset logic
-    if (ab){
-      digitalWrite(Breset, HIGH);
+    else {    
+      // write the received data from host to the other 2 Arduinos
+      writeOthers();
+      delay(WAIT_TIME);
+      
+      // read data from other 2 arduinos
+      readB();
+      readC();
+      
+      // compare data with arduino B
+      ab = different(Adata, Bdata, BUFFER_SIZE);
+      Serial.print("AB Compare: ");
+      Serial.println(ab);
+      
+      // compare data with arduino C
+      ac = different(Adata, Cdata, BUFFER_SIZE);
+      Serial.print("AC Compare: ");
+      Serial.println(ac);   
+      
+      // if there is a difference between the data received from the other arduions, trigger reset logic
+      if (ab){
+        digitalWrite(Breset, HIGH);
+      }
+      if (ac){
+        digitalWrite(Creset, HIGH);
+      }
+      if (ab || ac){
+        delay(RESET_TIME); // give time for the arduinos to reset
+      }
+      
+      // drive reset pins back low
+      digitalWrite(Breset, LOW);
+      digitalWrite(Creset, LOW);
     }
-    if (ac){
-      digitalWrite(Creset, HIGH);
-    }
-    if (ab || ac){
-      delay(RESET_TIME); // give time for the arduinos to reset
-    }
-    
-    // drive reset pins back low
-    digitalWrite(Breset, LOW);
-    digitalWrite(Creset, LOW);
-  }
-  sendDataToMain(); //SENDING TO MAIN  
+    sendDataToMain(); //SENDING TO MAIN  
 
   
   }
@@ -316,6 +317,10 @@ void clearArray(char* a, int n){
 void sendDataToMain(){
     Serial2.print(ARDUINO_ID);
     Serial2.print(errNum);
+    Serial.print(ARDUINO_ID);
+    Serial.print("\n");
+    Serial.print(errNum);
+    Serial.print("\n");
 
   if (!errMode){
   int i = 0;
@@ -328,9 +333,11 @@ void sendDataToMain(){
         break;
     }
     //send its vote to main
+    Serial2.print("AB and AC vote: ");
     Serial2.print(ab);
-    Serial2.print(ac);}
-    }
+    Serial2.println(ac);
+  }
+}
   
 
 /*
@@ -447,19 +454,24 @@ void T3interrupt(){
 
 // *** ERROR FUNCTIONS ***
 //only changes data recevied from host
+//INPUT=type of error
 void simulateError(int e){
+  int rand=1;
+  rand=rand % 3;
   switch(e) {
     case 1:
+      Adata[errbit]=~(Adata[errbit]);
       Serial.println("Bit flip");
       break;
     case 2:
-      Serial.println("Arithmetic");
+      Serial.println("Latch-up");
+      for (int i =0; i< BUFFER_SIZE -1; i++){
+        Adata[i]=(char) 255;}
       break;
     case 3:
-      Serial.println("Latch-up");
-      break;
-    case 4:
       Serial.println("Random");
+      rand++;
+      simulateError(rand);      
       break;
     default:
       Serial.println("Invalid errorcode");
@@ -471,10 +483,12 @@ void simulateError(int e){
 
 void checkError(){
   if (Adata[2] == 'E'){
-    errMode=TRUE;    //indicates to fn in error mode
+    errMode = TRUE;    //indicates to fn in error mode
     errNum = (int) Adata[2 + ARDUINO_ID] - '0';
     errbit = (int) Adata[6];
   }
-  else {errMode=FALSE;} //means just a regular msg is being sent 'normal mode'
+  else {
+    errMode = FALSE; //means just a regular msg is being sent 'normal mode'
+  } 
   
 }
