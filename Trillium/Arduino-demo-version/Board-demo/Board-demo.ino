@@ -184,11 +184,12 @@ void votingArray(){
     // if you dont want to operate in error mode, just comment out this line:
     checkError();
     
-    if (errbit>0) {
+    if (errbit>0 && !(errMode)) {
       simulateError(errNum);
     }
-            
-    else {    
+
+    if(!errMode){           
+       
       // write the received data from host to the other 2 Arduinos
       writeOthers();
       delay(WAIT_TIME);
@@ -224,8 +225,8 @@ void votingArray(){
       
       // drive reset pins back low
       digitalWrite(Breset, LOW);
-      digitalWrite(Creset, LOW);
-    }
+      digitalWrite(Creset, LOW);}
+    
     sendDataToMain(); //SENDING TO MAIN  
 
   
