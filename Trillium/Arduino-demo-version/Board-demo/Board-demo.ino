@@ -31,7 +31,7 @@ Software for controlling radiation redundency in the Trillium architechture. Cod
 #include "avr/sleep.h"
 
 //*** CHANGE THIS NUMBER BEFORE UPLOADING SKETCH ***
-#define ARDUINO_ID 3
+#define ARDUINO_ID 2
 
 //***VOTING FN USE
 
@@ -321,10 +321,9 @@ void clearArray(char* a, int n){
 void sendDataToMain(){
     Serial2.print(ARDUINO_ID);
     Serial2.print(errNum);
+    Serial.print("Arduino id and errnum:");
     Serial.print(ARDUINO_ID);
-    Serial.print("\n");
-    Serial.print(errNum);
-    Serial.print("\n");
+    Serial.println(errNum);
 
   if (!errMode){
   int i = 0;
@@ -487,7 +486,7 @@ void checkError(){
   if (Adata[2] == 'E'){
     errMode = TRUE;    //indicates to fn in error mode
     errNum = (int) Adata[2 + ARDUINO_ID] - '0';
-    errbit = (int) Adata[6];
+    errbit = (int) Adata[6] - 32;
   }
   else {
     errMode = FALSE; //means just a regular msg is being sent 'normal mode'
