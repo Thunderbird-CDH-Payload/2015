@@ -79,6 +79,8 @@ char Cdata[BUFFER_SIZE];
 int ac = 0;
 int ab = 0;
 
+long randNum;
+
 //***VOTING FN USE
 
 //variables for general system use
@@ -91,6 +93,8 @@ const int OSCycleCap = 10000; //number of OS cycles before roll-over
 
 
 void setup() {
+  randomSeed(100);  //random number generator 
+  
   Serial.begin(SERIAL_RATE);  
   Serial1.begin(SERIAL_RATE);
   Serial2.begin(SERIAL_RATE);
@@ -456,8 +460,6 @@ void T3interrupt(){
 //only changes data recevied from host
 //INPUT=type of error
 void simulateError(int e){
-  int rand=1;
-  rand=rand % 3;
   switch(e) {
     case 1:
       Adata[errbit]=~(Adata[errbit]);
@@ -470,8 +472,8 @@ void simulateError(int e){
       break;
     case 3:
       Serial.println("Random");
-      rand++;
-      simulateError(rand);      
+      randNum=(random(300) % 3) + 1;  //covers all cases
+      simulateError(randNum);      
       break;
     default:
       Serial.println("Invalid errorcode");
