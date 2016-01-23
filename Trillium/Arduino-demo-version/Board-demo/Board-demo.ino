@@ -31,7 +31,7 @@ Software for controlling radiation redundency in the Trillium architechture. Cod
 #include "avr/sleep.h"
 
 //*** CHANGE THIS NUMBER BEFORE UPLOADING SKETCH ***
-#define ARDUINO_ID 2
+#define ARDUINO_ID 3
 
 //***VOTING FN USE
 
@@ -184,7 +184,7 @@ void votingArray(){
     // if you dont want to operate in error mode, just comment out this line:
     checkError();
     
-    if (errMode == TRUE) {
+    if (errbit>0) {
       simulateError(errNum);
     }
             
