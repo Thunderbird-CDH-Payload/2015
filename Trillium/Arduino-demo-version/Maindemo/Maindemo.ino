@@ -77,9 +77,12 @@ void sendInput(){
 }
 
 void receiveResponse(){
-    while (!((Serial1.available()>0) && (Serial2.available()>0) && (Serial3.available()>0))){
+    int i;
+    while (!((Serial1.available()>0) && (Serial2.available()>0) && (Serial3.available()>0)) && i < 500){
         //loop around till theres something to read from all of them
         //still gotta take of the case where a board didnt get anything or failed to send back - should add some sort of timer **
+        delay(1);
+        i++;
     }
     delay(WAIT_TIME);
     readA();
