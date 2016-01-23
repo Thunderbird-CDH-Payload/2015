@@ -141,21 +141,27 @@ void clearArray(char* a, int n){
 //error response
 //not recognizing which board has the error
 void outputErrRes(){
-  if (Adata[1]>0){
+  int Aerr = (int) Adata[1] -'0';
+  int Berr = (int) Bdata[1] -'0';
+  int Cerr = (int) Cdata[1] -'0';
+  if (Aerr>0){
     Serial.print("A board got error: \n");
-    Serial.print(Adata[1]);}
+    Serial.print(Adata[1]);
+    Serial.print("\n");}
     else {
-      Serial.print("A is in normal mode");}
-  if (Bdata[1]>0){
+      Serial.print("A is in normal mode\n");}
+  if (Berr>0){
     Serial.print("B board got error:\n");
-    Serial.print(Bdata[1]);}
+    Serial.print(Bdata[1]);
+    Serial.print("\n");}
     else {
-      Serial.print("B is in normal mode");}
-  if (Cdata[1]>0){
+      Serial.print("B is in normal mode\n");}
+  if (Cerr>0){
     Serial.print("C board got error:\n");
-    Serial.print(Cdata[1]);}
+    Serial.print(Cdata[1]);
+    Serial.print("\n");}
     else {
-      Serial.print("C is in normal mode");}
+      Serial.print("C is in normal mode\n");}
   }
 
     
