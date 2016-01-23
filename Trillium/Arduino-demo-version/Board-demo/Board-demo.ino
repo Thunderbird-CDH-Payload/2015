@@ -200,11 +200,15 @@ void votingArray(){
       // compare data with arduino B
       ab = different(Adata, Bdata, BUFFER_SIZE);
       Serial.print("AB Compare: ");
+      Serial.print(Bdata);
+      Serial.print("\n");
       Serial.println(ab);
       
       // compare data with arduino C
       ac = different(Adata, Cdata, BUFFER_SIZE);
       Serial.print("AC Compare: ");
+       Serial.print(Cdata);
+      Serial.print("\n");
       Serial.println(ac);   
       
       // if there is a difference between the data received from the other arduions, trigger reset logic
