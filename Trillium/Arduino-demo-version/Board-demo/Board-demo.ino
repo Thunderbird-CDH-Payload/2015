@@ -184,9 +184,16 @@ void votingArray(){
     // if you dont want to operate in error mode, just comment out this line:
     checkError();
     
-    if (errbit>0) {
+    if (errbit>0 && !(errMode)) {
       simulateError(errNum);
+<<<<<<< HEAD
     }    
+=======
+    }
+
+    if(!errMode){           
+       
+>>>>>>> 9470cfcc648b60822a0e32a79ce8002f24dc583f
       // write the received data from host to the other 2 Arduinos
       writeOthers();
       delay(WAIT_TIME);
@@ -198,11 +205,15 @@ void votingArray(){
       // compare data with arduino B
       ab = different(Adata, Bdata, BUFFER_SIZE);
       Serial.print("AB Compare: ");
+      Serial.print(Bdata);
+      Serial.print("\n");
       Serial.println(ab);
       
       // compare data with arduino C
       ac = different(Adata, Cdata, BUFFER_SIZE);
       Serial.print("AC Compare: ");
+       Serial.print(Cdata);
+      Serial.print("\n");
       Serial.println(ac);   
       
       // if there is a difference between the data received from the other arduions, trigger reset logic
@@ -218,8 +229,13 @@ void votingArray(){
       
       // drive reset pins back low
       digitalWrite(Breset, LOW);
+<<<<<<< HEAD
       digitalWrite(Creset, LOW);
       
+=======
+      digitalWrite(Creset, LOW);}
+    
+>>>>>>> 9470cfcc648b60822a0e32a79ce8002f24dc583f
     sendDataToMain(); //SENDING TO MAIN  
 
   
