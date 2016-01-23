@@ -1,0 +1,4 @@
+ANDROID:
+(DONE)Boot our app at startup
+Access phone camera and dump raw image / byte array
+Blank methods that can be called by arduino
