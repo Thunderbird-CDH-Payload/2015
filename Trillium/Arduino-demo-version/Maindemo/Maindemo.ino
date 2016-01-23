@@ -137,9 +137,12 @@ void clearArray(char* a, int n){
   } 
 }
 
+
+//error response
+//not recognizing which board has the error
 void outputErrRes(){
   if (Adata[1]>0){
-    Serial.print("A board got error:\n");
+    Serial.print("A board got error: \n");
     Serial.print(Adata[1]);}
     else {
       Serial.print("A is in normal mode");}
