@@ -31,7 +31,7 @@ Software for controlling radiation redundency in the Trillium architechture. Cod
 #include "avr/sleep.h"
 
 //*** CHANGE THIS NUMBER BEFORE UPLOADING SKETCH ***
-#define ARDUINO_ID 1
+#define ARDUINO_ID 3
 
 //***VOTING FN USE
 
@@ -454,19 +454,24 @@ void T3interrupt(){
 
 // *** ERROR FUNCTIONS ***
 //only changes data recevied from host
+//INPUT=type of error
 void simulateError(int e){
+  int rand=1;
+  rand=rand % 3;
   switch(e) {
     case 1:
+      Adata[errbit]=~(Adata[errbit]);
       Serial.println("Bit flip");
       break;
     case 2:
-      Serial.println("Arithmetic");
+      Serial.println("Latch-up");
+      for (int i =0; i< BUFFER_SIZE -1; i++){
+        Adata[i]=(char) 255;}
       break;
     case 3:
-      Serial.println("Latch-up");
-      break;
-    case 4:
       Serial.println("Random");
+      rand++;
+      simulateError(rand);      
       break;
     default:
       Serial.println("Invalid errorcode");
