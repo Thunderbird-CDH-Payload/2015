@@ -1,4 +1,0 @@
-Things needed for android 
-Boot our app at startup
-Why is it voting
-Blank methods that can be callledx by arduino

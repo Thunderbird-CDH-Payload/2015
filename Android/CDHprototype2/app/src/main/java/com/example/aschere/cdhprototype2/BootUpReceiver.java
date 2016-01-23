@@ -16,8 +16,8 @@ public class BootUpReceiver extends BroadcastReceiver
 		// TODO: This method is called when the BroadcastReceiver is receiving
 
 		// Start Service On Boot Start Up
-		//Intent service = new Intent(context, TestService.class);
-		//context.startService(service);
+		Intent service = new Intent(context, DataFromArduinoReceiver.class);
+		context.startService(service);
 
 		//Start App On Boot Start Up
 		Intent App = new Intent(context, MainActivity.class);
