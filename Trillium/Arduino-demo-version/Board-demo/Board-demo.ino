@@ -317,6 +317,8 @@ void clearArray(char* a, int n){
 void sendDataToMain(){
     Serial2.print(ARDUINO_ID);
     Serial2.print(errNum);
+    Serial.print(ARDUINO_ID"\n");
+    Serial.print(errNUM"n");
 
   if (!errMode){
   int i = 0;
