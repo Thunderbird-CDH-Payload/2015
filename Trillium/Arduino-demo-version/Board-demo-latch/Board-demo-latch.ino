@@ -32,7 +32,7 @@ Software for controlling radiation redundency in the Trillium architechture. Cod
 #include "avr/sleep.h"
 
 //*** CHANGE THIS NUMBER BEFORE UPLOADING SKETCH ***
-#define ARDUINO_ID 2
+#define ARDUINO_ID 1
 
 //***VOTING FN USE
 
@@ -184,7 +184,8 @@ void votingArray(){
   if (getSignalData()){    
     // if you dont want to operate in error mode, just comment out this line:
     checkError();
-    simulateError(errNum);
+    if (errbit > 0 && !errMode)
+      simulateError(errNum);
 
     // write the received data from host to the other 2 Arduinos
     writeOthers();
@@ -458,11 +459,6 @@ void T3interrupt(){
 //INPUT=type of error
 void simulateError(int e){
   switch(e) {
-    case 0:
-      if (!Serial1)
-        Serial1.begin(SERIAL_RATE);
-      while(!Serial1);
-      break;
     case 1:
       Adata[errbit]=~(Adata[errbit]);
       Serial.println("Bit flip");
@@ -491,6 +487,9 @@ void checkError(){
     errMode = TRUE;    //indicates to fn in error mode
     errNum = (int) Adata[2 + ARDUINO_ID] - '0';
     errbit = (int) Adata[6] - 32;
+    if (errNum == 0 && !Serial1)
+        Serial1.begin(SERIAL_RATE);
+    while(!Serial1);
   }
   else {
     errMode = FALSE; //means just a regular msg is being sent 'normal mode'
