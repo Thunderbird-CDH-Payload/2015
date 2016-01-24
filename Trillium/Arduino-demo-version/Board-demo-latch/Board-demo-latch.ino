@@ -32,7 +32,7 @@ Software for controlling radiation redundency in the Trillium architechture. Cod
 #include "avr/sleep.h"
 
 //*** CHANGE THIS NUMBER BEFORE UPLOADING SKETCH ***
-#define ARDUINO_ID 3
+#define ARDUINO_ID 2
 
 //***VOTING FN USE
 
@@ -186,49 +186,44 @@ void votingArray(){
     checkError();
     simulateError(errNum);
 
-    if(!errMode){           
-       
-      // write the received data from host to the other 2 Arduinos
-      writeOthers();
-      delay(WAIT_TIME);
-      
-      // read data from other 2 arduinos
-      readB();
-      readC();
-      
-      // compare data with arduino B
-      ab = different(Adata, Bdata, BUFFER_SIZE);
-      Serial.print("AB Compare: ");
-      Serial.print(Bdata);
-      Serial.print("\n");
-      Serial.println(ab);
-      
-      // compare data with arduino C
-      ac = different(Adata, Cdata, BUFFER_SIZE);
-      Serial.print("AC Compare: ");
-       Serial.print(Cdata);
-      Serial.print("\n");
-      Serial.println(ac);   
-      
-      // if there is a difference between the data received from the other arduions, trigger reset logic
-      if (ab){
-        digitalWrite(Breset, HIGH);
-      }
-      if (ac){
-        digitalWrite(Creset, HIGH);
-      }
-      if (ab || ac){
-        delay(RESET_TIME); // give time for the arduinos to reset
-      }
-      
-      // drive reset pins back low
-      digitalWrite(Breset, LOW);
-      digitalWrite(Creset, LOW);}
+    // write the received data from host to the other 2 Arduinos
+    writeOthers();
+    delay(WAIT_TIME);
+    
+    // read data from other 2 arduinos
+    readB();
+    readC();
+    
+    // compare data with arduino B
+    ab = different(Adata, Bdata, BUFFER_SIZE);
+    Serial.print("AB Compare: ");
+    Serial.print(Bdata);
+    Serial.print("\n");
+    Serial.println(ab);
+    
+    // compare data with arduino C
+    ac = different(Adata, Cdata, BUFFER_SIZE);
+    Serial.print("AC Compare: ");
+     Serial.print(Cdata);
+    Serial.print("\n");
+    Serial.println(ac);   
+    
+    // if there is a difference between the data received from the other arduions, trigger reset logic
+    if (ab){
+      digitalWrite(Breset, HIGH);
+    }
+    if (ac){
+      digitalWrite(Creset, HIGH);
+    }
+    if (ab || ac){
+      delay(RESET_TIME); // give time for the arduinos to reset
+    }
+    
+    // drive reset pins back low
+    digitalWrite(Breset, LOW);
+    digitalWrite(Creset, LOW);}
     
     sendDataToMain(); //SENDING TO MAIN  
-
-  
-  }
   
 }
 
