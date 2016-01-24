@@ -1,9 +1,8 @@
 package com.example.aschere.cdhprototype2;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -61,12 +60,16 @@ public class MainActivity extends AppCompatActivity
 
 	public byte[] takeCameraImage()
 	{
-		if(!cameraHandler.checkCameraHardware(this.getApplicationContext()))
+		/*if(!cameraHandler.checkCameraHardware(this.getApplicationContext()))
 		{
 			Log.e("MainActivity", "Mission Fail! Can't connect to camera!");
 			return null;
-		}
-		return cameraHandler.captureImage();
+		}*/
+
+		//take picture
+		//return cameraHandler.captureImage((CameraManager) getSystemService(Context.CAMERA_SERVICE));
+
+		return null;
 	}
 
 

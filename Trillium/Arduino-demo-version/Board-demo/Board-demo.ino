@@ -32,7 +32,7 @@ Software for controlling radiation redundency in the Trillium architechture. Cod
 #include "avr/sleep.h"
 
 //*** CHANGE THIS NUMBER BEFORE UPLOADING SKETCH ***
-#define ARDUINO_ID 3
+#define ARDUINO_ID 2
 
 //***VOTING FN USE
 
@@ -187,10 +187,14 @@ void votingArray(){
     
     if (errbit>0 && !(errMode)) {
       simulateError(errNum);
+<<<<<<< HEAD
+    }    
+=======
     }
 
     if(!errMode){           
        
+>>>>>>> 9470cfcc648b60822a0e32a79ce8002f24dc583f
       // write the received data from host to the other 2 Arduinos
       writeOthers();
       delay(WAIT_TIME);
@@ -226,8 +230,13 @@ void votingArray(){
       
       // drive reset pins back low
       digitalWrite(Breset, LOW);
+<<<<<<< HEAD
+      digitalWrite(Creset, LOW);
+      
+=======
       digitalWrite(Creset, LOW);}
     
+>>>>>>> 9470cfcc648b60822a0e32a79ce8002f24dc583f
     sendDataToMain(); //SENDING TO MAIN  
 
   

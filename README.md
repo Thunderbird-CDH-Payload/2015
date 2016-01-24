@@ -1,14 +1,21 @@
 # UBC Orbit CDH-Payload Repo
-UBC Orbit CDH team repo for 2015-2016  
-WE MADE A THING FOR SPAAAACE  
-This repo contains the code for UBC Orbit's triple redundancy Trillium main processor and code to manipulate the 
+UBC Orbit CDH Team Repository for 2015-2016  
+>*[WE MADE A THING FOR SPAAAACE](http://theportalwiki.com/wiki/Space_Sphere)*  
+
+This repo contains the code for UBC Orbit's triple redundancy Trillium main processor, and code to manipulate the 
 Android phone that we will have on the satellite. 
 
-# Android App
--Will run on boot (Thanks http://www.khurramitdeveloper.blogspot.ca/)  
--Uses Intents for IPC with Arduino Communicator
+## Trillium
 
-# For communicating with Arduino (Android)
+
+## Android App
+### Features
+-Will run on boot (Thanks http://www.khurramitdeveloper.blogspot.ca/)  
+-Uses Intents for IPC with [Arduino Communicator](https://github.com/jeppsson/Arduino-Communicator)  
+-Uses [Camera2 API](https://developer.android.com/reference/android/hardware/camera2/package-summary.html) to obtain RAW images (requires Android 5.0+ (SDK 21+))  
+### For communicating with Arduino
 Edit
 \2015\Android\CDHprototype2\app\src\main\java\com\example\aschere\cdhprototype2\DataFromArduinoReceiver.java  
 And add a switch case with a byte representing an instruction to the Arduino. (Sorta like opcode)
+### TODO
+See TODO under /Android/
