@@ -57,10 +57,15 @@ Software for controlling radiation redundency in the Trillium architechture. Cod
 #define SECOND_CHAR 'Y' // this must be different than END_CHAR
 #define END_CHAR 'Z'
 
+
+
 //*** ERROR FN USE
+#define ERR_LATCH_UP 2
+
 int errMode=FALSE;
 int errNum = 0;
 int errbit = 0;
+// *** END ERROR FN
 
 
 //Pin declarations here
@@ -231,6 +236,10 @@ void votingArray(){
 
 // this function reads the data from the host
 int getSignalData(){
+  if(errMode != ERR_LATCH_UP && !Serial1){
+    Serial1.begin(SERIAL_RATE);
+    while(!Serial1);
+  }
   delay(WAIT_TIME);
   clearArray(Adata, BUFFER_SIZE);
   int m=0;
@@ -467,6 +476,7 @@ void simulateError(int e){
     case 2:
       Serial.println("Latch-up");
       Serial1.end();
+      while(Serial1);
       pinMode(18, OUTPUT);
       digitalWrite(18, HIGH);
       break;
@@ -488,12 +498,11 @@ void checkError(){
     errMode = TRUE;    //indicates to fn in error mode
     errNum = (int) Adata[2 + ARDUINO_ID] - '0';
     errbit = (int) Adata[6] - 32;
-    if (errNum == 0 && !Serial1)
-        Serial1.begin(SERIAL_RATE);
-    while(!Serial1);
   }
   else {
     errMode = FALSE; //means just a regular msg is being sent 'normal mode'
+    errNum = 0;
+    errbit = 0;
   } 
   
 }
