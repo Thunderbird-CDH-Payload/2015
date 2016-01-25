@@ -472,14 +472,10 @@ void simulateError(int e){
       break;
     case 2:
       Serial.println("Latch-up");
-      Serial1.flush();
       Serial1.end();
       delay(LATCH_UP_TIME);
       Serial1.begin(SERIAL_RATE);
       while(!Serial1);
-      while(Serial1.available()){
-        Serial1.read(); 
-      }
       Serial.println("Latch-up over");
       errMode = FALSE;
       errNum = 0;
