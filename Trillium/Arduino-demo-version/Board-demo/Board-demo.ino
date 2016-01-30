@@ -473,7 +473,7 @@ void simulateError(int e){
       break;
     case 2:
       Serial.println("Latch-up");
-      for (int i =0; i< BUFFER_SIZE -1; i++){
+      for (int i =0; i< BUFFER_SIZE -15; i++){
         Adata[i]=(char) 255;}
         Adata[BUFFER_SIZE-1]='\0';
       break;
