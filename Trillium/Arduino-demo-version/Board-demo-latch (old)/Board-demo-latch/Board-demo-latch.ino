@@ -32,7 +32,7 @@ Software for controlling radiation redundency in the Trillium architechture. Cod
 #include "avr/sleep.h"
 
 //*** CHANGE THIS NUMBER BEFORE UPLOADING SKETCH ***
-#define ARDUINO_ID 2
+#define ARDUINO_ID 1
 
 //***VOTING FN USE
 
@@ -57,12 +57,16 @@ Software for controlling radiation redundency in the Trillium architechture. Cod
 #define SECOND_CHAR 'Y' // this must be different than END_CHAR
 #define END_CHAR 'Z'
 
+
+
 //*** ERROR FN USE
+#define ERR_LATCH_UP 2
 #define LATCH_UP_TIME 10000
 
 int errMode=FALSE;
 int errNum = 0;
 int errbit = 0;
+// *** END ERROR FN
 
 
 //Pin declarations here
@@ -186,13 +190,10 @@ void votingArray(){
   if (getSignalData()){    
     // if you dont want to operate in error mode, just comment out this line:
     checkError();
-    
-    if (errbit>0 && !(errMode)) {
+    if (errbit > 0)
       simulateError(errNum);
-    }
-
-    if(!errMode){           
-       
+    
+    if(!errMode){     
       // write the received data from host to the other 2 Arduinos
       writeOthers();
       delay(WAIT_TIME);
@@ -229,12 +230,9 @@ void votingArray(){
       // drive reset pins back low
       digitalWrite(Breset, LOW);
       digitalWrite(Creset, LOW);}
-    
-    sendDataToMain(); //SENDING TO MAIN  
-
-  
-  }
-  
+      
+      sendDataToMain(); //SENDING TO MAIN
+   }  
 }
 
 // this function reads the data from the host
@@ -479,6 +477,8 @@ void simulateError(int e){
       Serial1.begin(SERIAL_RATE);
       while(!Serial1);
       Serial.println("Latch-up over");
+      errMode = FALSE;
+      errNum = 0;
       break;
     case 3:
       Serial.println("Random");
@@ -501,6 +501,7 @@ void checkError(){
   }
   else {
     errMode = FALSE; //means just a regular msg is being sent 'normal mode'
+    errNum = 0;
   } 
   
 }
