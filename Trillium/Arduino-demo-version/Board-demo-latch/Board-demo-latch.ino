@@ -478,6 +478,8 @@ void simulateError(int e){
       delay(LATCH_UP_TIME);
       Serial1.begin(SERIAL_RATE);
       while(!Serial1);
+      while(Serial1.available())
+        Serial1.read();
       Serial.println("Latch-up over");
       break;
     case 3:
