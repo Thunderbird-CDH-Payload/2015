@@ -185,7 +185,7 @@ void votingArray(){
     // if you dont want to operate in error mode, just comment out this line:
     checkError();
     
-    if (errbit>0 && !(errMode)) {
+    if (!(errMode)) {
       simulateError(errNum);
     }
 
@@ -467,8 +467,9 @@ void T3interrupt(){
 void simulateError(int e){
   switch(e) {
     case 1:
+      if (errbit>0){
       Adata[errbit]=~(Adata[errbit]);
-      Serial.println("Bit flip");
+      Serial.println("Bit flip");}
       break;
     case 2:
       Serial.println("Latch-up");
