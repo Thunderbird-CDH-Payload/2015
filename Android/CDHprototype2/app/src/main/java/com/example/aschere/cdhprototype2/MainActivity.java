@@ -1,8 +1,12 @@
 package com.example.aschere.cdhprototype2;
 
+import android.content.Context;
 import android.content.Intent;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -49,6 +53,13 @@ public class MainActivity extends AppCompatActivity
 		sendDataToArduino(new byte[2]); //should be sending a magic number indicating phone is available
 	}
 
+	@Override
+	protected void onPause()
+	{
+
+		super.onPause();
+	}
+
 	public boolean sendDataToArduino(byte[] byteArray)
 	{
 		Intent sendingIntent = new Intent("primavera.arduino.intent.action.SEND_DATA"); //new intent for starting
@@ -67,8 +78,14 @@ public class MainActivity extends AppCompatActivity
 		}*/
 
 		//take picture
-		//return cameraHandler.captureImage((CameraManager) getSystemService(Context.CAMERA_SERVICE));
-
+		try
+		{
+			return cameraHandler.captureImage((CameraManager) getSystemService(Context.CAMERA_SERVICE));
+		}
+		catch (CameraAccessException e)
+		{
+			Log.e("Main:takeCameraImage", "Camera access exception: " + e.getLocalizedMessage());
+		}
 		return null;
 	}
 
