@@ -67,12 +67,12 @@ void sendInput(){
     Serial1.print("AA");  //indicates to boards that its the start of the msg
     int i=0;
     while(i<BUFFER_SIZE){
-        if (!(msg[i]==NULL)){
+        if (!(msg[i]=='\n')){
             Serial1.print(msg[i]);
             i++;}
         else {break;}
     }
-    Serial1.print("ZZ");  //indicates to boards that its the end of the msg 
+    Serial1.print("YZ");  //indicates to boards that its the end of the msg 
     
 }
 

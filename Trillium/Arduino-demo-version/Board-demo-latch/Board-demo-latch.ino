@@ -32,7 +32,7 @@ Software for controlling radiation redundency in the Trillium architechture. Cod
 #include "avr/sleep.h"
 
 //*** CHANGE THIS NUMBER BEFORE UPLOADING SKETCH ***
-#define ARDUINO_ID 2
+#define ARDUINO_ID 1
 
 //***VOTING FN USE
 
@@ -42,7 +42,7 @@ Software for controlling radiation redundency in the Trillium architechture. Cod
 // number of milliseconds to wait before acquiring data from host
 #define WAIT_TIME 50
 // number of milliseconds to wait after resetting the Arduino
-#define RESET_TIME 200
+#define RESET_TIME 500
 
 // size of the character buffers
 #define BUFFER_SIZE 64
@@ -217,9 +217,13 @@ void votingArray(){
       
       // if there is a difference between the data received from the other arduions, trigger reset logic
       if (ab){
+        Serial.print("Driving pin to high: ");
+        Serial.println(Breset);
         digitalWrite(Breset, HIGH);
       }
       if (ac){
+        Serial.print("Driving pin to high: ");
+        Serial.println(Creset);
         digitalWrite(Creset, HIGH);
       }
       if (ab || ac){
@@ -271,7 +275,7 @@ int readB(){
   clearArray(Bdata, BUFFER_SIZE);
   int m=0;
   while(Serial2.available() > 0){
-    char temp = Serial2.read();
+    char temp = (Serial2.read());
     Bdata[m] = temp;
     m++;
     if (temp == END_CHAR)
