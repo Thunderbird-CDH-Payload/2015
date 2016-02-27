@@ -31,50 +31,6 @@ public class CaptureCamera
 	protected CameraCaptureSession cameraCaptureSession;
 	protected CameraCharacteristics cameraCharacteristics;
 	protected CameraDevice cameraDevice;
-	protected ImageReader imageReader;
-
-	private void setCameraDevice(CameraManager manglement)
-	{
-		String TAG = "setCameraDevice";
-		String[] rawCameraList;
-
-		cameraManager = manglement;
-		try
-		{
-			rawCameraList = cameraManager.getCameraIdList();
-			for (String cameraId: rawCameraList)
-			{
-				CameraCharacteristics camChars = cameraManager.getCameraCharacteristics(cameraId);
-				//get camera characteristics
-
-				//get rear-facing camera
-				Integer facing = camChars.get(CameraCharacteristics.LENS_FACING);
-				if(facing != null && facing == CameraCharacteristics.LENS_FACING_BACK)
-				{
-					int[] capabilities = camChars.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
-					//get RAW-capable camera
-					assert capabilities != null;
-					for (int capabilitiesIntegers: capabilities)
-					{
-						if(capabilitiesIntegers == CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_RAW)
-						{
-							mainCamera = cameraId;
-							cameraCharacteristics = manglement.getCameraCharacteristics(mainCamera);
-							return;
-						}
-					}
-					Log.w(TAG, "No camera with RAW capabilities!");
-				}
-				Log.w(TAG, "No rear-facing camera!");
-			}
-
-		}
-		catch (Exception e)
-		{
-			Log.e(TAG, "Failed to obtain list of camera list");
-		}
-	}
-
 	private final CameraDevice.StateCallback cameraCallback = new CameraDevice.StateCallback()
 	{
 		String TAG = "CameraStateCallback";
@@ -98,116 +54,7 @@ public class CaptureCamera
 			Log.e(TAG, "Camera error! " + error);
 		}
 	};
-
-	protected String imageNameGenerator()
-	{
-		//TODO: create useful unique name
-		//this method should have some way of "remembering" the newest file name and increment it
-		//OR use timestamp method
-		//following code copied from:
-		//https://developer.android.com/training/camera/photobasics.html
-
-		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-		return "JPEG_" + timeStamp + "_" + ".raw";
-	}
-
-	/* Checks if external storage is available for read and write */
-	public boolean isExternalStorageWritable() {
-		String state = Environment.getExternalStorageState();
-		return Environment.MEDIA_MOUNTED.equals(state);
-	}
-
-	/* Checks if external storage is available to at least read */
-	public boolean isExternalStorageReadable() {
-		String state = Environment.getExternalStorageState();
-		return Environment.MEDIA_MOUNTED.equals(state) ||
-				Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
-	}
-
-	public byte[] captureImage(CameraManager manglement) throws CameraAccessException, SecurityException
-	{
-		String TAG = "CaptureImage";
-		this.setCameraDevice(manglement);
-
-		if(mainCamera==null)
-		{ //there is no main camera with necessary capabilities
-			Log.e(TAG, "No main camera to capture images with!");
-			return null;
-		}
-
-		//Open the camera
-		Log.i(TAG, "Trying to open camera...");
-		manglement.openCamera(mainCamera, cameraCallback, null);
-		//Log.i(TAG, "Camera opened!");
-
-		if(!Objects.equals(cameraDevice.getId(), mainCamera))
-		{ //there is no main camera with necessary capabilities
-			Log.e(TAG, "No main camera to capture images with!");
-			return null;
-		}
-
-		//TODO: Capture Image
-		captureBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
-		//Auto-focus (code from android-Camera2Raw)
-		captureBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
-		//Auto-Exposure (ditto)
-		captureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
-
-		int width;
-		int height;
-
-		try
-		{ //attempt to obtain the width and height of the camera result
-			width = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE).getWidth();
-			height = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE).getHeight();
-		}
-		catch(NullPointerException e)
-		{
-			Log.e(TAG, "Failed to obtain width or height or camera!" + e.getLocalizedMessage());
-			return null;
-		}
-
-		//Create receiving surface
-		imageReader = ImageReader.newInstance(width, height, ImageFormat.RAW_SENSOR, 2);
-		//cameraCaptureSession.prepare(imageReader.getSurface());
-		captureBuilder.addTarget(imageReader.getSurface());
-
-		//Create the request
-		CaptureRequest theRequest = captureBuilder.build();
-
-		//Capture
-		cameraCaptureSession.capture(theRequest, captureCallback, new Handler());
-		//CameraDevice rawCamera =
-
-		//Save image
-
-		return null;
-	}
-
-	protected boolean dumpRawFile(TotalCaptureResult result)
-	{
-		String TAG = "dumpRawFile";
-		File rawFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-				imageNameGenerator());
-		DngCreator rawDumper = new DngCreator(cameraCharacteristics, result);
-		try
-		{
-			FileOutputStream outputStream = new FileOutputStream(rawFile);
-			rawDumper.writeImage(outputStream, imageReader.acquireLatestImage());
-			return true;
-		} catch (FileNotFoundException e)
-		{
-			Log.e(TAG, "File not found! " + e.getLocalizedMessage());
-			e.printStackTrace();
-			return false;
-		} catch (IOException e)
-		{
-			Log.e(TAG, "IOException! " + e.getLocalizedMessage());
-			e.printStackTrace();
-			return false;
-		}
-	}
-
+	protected ImageReader imageReader;
 	protected CameraCaptureSession.CaptureCallback captureCallback = new CameraCaptureSession.CaptureCallback()
 	{
 		String TAG = "CaptureCallback";
@@ -354,4 +201,155 @@ public class CaptureCamera
 			super.onCaptureSequenceAborted(session, sequenceId);
 		}
 	};
+
+	private void setCameraDevice(CameraManager manglement)
+	{
+		String TAG = "setCameraDevice";
+		String[] rawCameraList;
+
+		cameraManager = manglement;
+		try
+		{
+			rawCameraList = cameraManager.getCameraIdList();
+			for (String cameraId : rawCameraList)
+			{
+				CameraCharacteristics camChars = cameraManager.getCameraCharacteristics(cameraId);
+				//get camera characteristics
+
+				//get rear-facing camera
+				Integer facing = camChars.get(CameraCharacteristics.LENS_FACING);
+				if (facing != null && facing == CameraCharacteristics.LENS_FACING_BACK)
+				{
+					int[] capabilities = camChars.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
+					//get RAW-capable camera
+					assert capabilities != null;
+					for (int capabilitiesIntegers : capabilities)
+					{
+						if (capabilitiesIntegers == CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_RAW)
+						{
+							mainCamera = cameraId;
+							cameraCharacteristics = manglement.getCameraCharacteristics(mainCamera);
+							return;
+						}
+					}
+					Log.w(TAG, "No camera with RAW capabilities!");
+				}
+				Log.w(TAG, "No rear-facing camera!");
+			}
+
+		} catch (Exception e)
+		{
+			Log.e(TAG, "Failed to obtain list of camera list");
+		}
+	}
+
+	protected String imageNameGenerator()
+	{
+		//TODO: create useful unique name
+		//this method should have some way of "remembering" the newest file name and increment it
+		//OR use timestamp method
+		//following code copied from:
+		//https://developer.android.com/training/camera/photobasics.html
+
+		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+		return "JPEG_" + timeStamp + "_" + ".raw";
+	}
+
+	/* Checks if external storage is available for read and write */
+	public boolean isExternalStorageWritable()
+	{
+		String state = Environment.getExternalStorageState();
+		return Environment.MEDIA_MOUNTED.equals(state);
+	}
+
+	/* Checks if external storage is available to at least read */
+	public boolean isExternalStorageReadable()
+	{
+		String state = Environment.getExternalStorageState();
+		return Environment.MEDIA_MOUNTED.equals(state) ||
+				Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
+	}
+
+	public byte[] captureImage(CameraManager manglement) throws CameraAccessException, SecurityException
+	{
+		String TAG = "CaptureImage";
+		this.setCameraDevice(manglement);
+
+		if (mainCamera == null)
+		{ //there is no main camera with necessary capabilities
+			Log.e(TAG, "No main camera to capture images with!");
+			return null;
+		}
+
+		//Open the camera
+		Log.i(TAG, "Trying to open camera...");
+		manglement.openCamera(mainCamera, cameraCallback, null);
+		//Log.i(TAG, "Camera opened!");
+
+		if (!Objects.equals(cameraDevice.getId(), mainCamera))
+		{ //there is no main camera with necessary capabilities
+			Log.e(TAG, "No main camera to capture images with!");
+			return null;
+		}
+
+		//TODO: Capture Image
+		captureBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+		//Auto-focus (code from android-Camera2Raw)
+		captureBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
+		//Auto-Exposure (ditto)
+		captureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+
+		int width;
+		int height;
+
+		try
+		{ //attempt to obtain the width and height of the camera result
+			width = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE).getWidth();
+			height = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE).getHeight();
+		} catch (NullPointerException e)
+		{
+			Log.e(TAG, "Failed to obtain width or height or camera!" + e.getLocalizedMessage());
+			return null;
+		}
+
+		//Create receiving surface
+		imageReader = ImageReader.newInstance(width, height, ImageFormat.RAW_SENSOR, 2);
+		//cameraCaptureSession.prepare(imageReader.getSurface());
+		captureBuilder.addTarget(imageReader.getSurface());
+
+		//Create the request
+		CaptureRequest theRequest = captureBuilder.build();
+
+		//Capture
+		cameraCaptureSession.capture(theRequest, captureCallback, new Handler());
+		//CameraDevice rawCamera =
+
+		//Save image
+
+		return null;
+	}
+
+	protected boolean dumpRawFile(TotalCaptureResult result)
+	{
+		String TAG = "dumpRawFile";
+		File rawFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+				imageNameGenerator());
+		DngCreator rawDumper = new DngCreator(cameraCharacteristics, result);
+		try
+		{
+			FileOutputStream outputStream = new FileOutputStream(rawFile);
+			rawDumper.writeImage(outputStream, imageReader.acquireLatestImage());
+			return true;
+		} catch (FileNotFoundException e)
+		{
+			Log.e(TAG, "File not found! " + e.getLocalizedMessage());
+			e.printStackTrace();
+			return false;
+		} catch (IOException e)
+		{
+			Log.e(TAG, "IOException! " + e.getLocalizedMessage());
+			e.printStackTrace();
+			return false;
+		}
+	}
 }

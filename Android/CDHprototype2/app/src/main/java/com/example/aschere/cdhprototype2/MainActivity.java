@@ -20,8 +20,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity
 {
-	protected static ArrayList<byte[]> magicNumber;
 	public static TextView receivedDataDisplayer;
+	protected static ArrayList<byte[]> magicNumber;
 	protected static CaptureCamera cameraHandler = new CaptureCamera();
 
 	@Override
@@ -38,13 +38,13 @@ public class MainActivity extends AppCompatActivity
 			@Override
 			public void onClick(View v)
 			{
-				String TAG="ButtonOnClick";
-				byte[] helloWorldArray = new byte[] {'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!'};
+				String TAG = "ButtonOnClick";
+				byte[] helloWorldArray = new byte[]{'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!'};
 				System.out.println("Hello World Array " + Arrays.toString(helloWorldArray));
 				//sendDataToArduino(helloWorldArray);
 				takeCameraImage();
 				UsbSerialPort arduinoPort = openConnection();
-				if(arduinoPort==null)
+				if (arduinoPort == null)
 				{
 					return;
 				}
@@ -80,6 +80,7 @@ public class MainActivity extends AppCompatActivity
 
 	/**
 	 * Opens a connection with whatever USB device is attached.
+	 *
 	 * @return port a UsbSerialPort that can be written/read to/from
 	 */
 	public UsbSerialPort openConnection()
@@ -88,26 +89,28 @@ public class MainActivity extends AppCompatActivity
 		// Find all available drivers from attached devices.
 		UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
 		List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
-		if (availableDrivers.isEmpty()) {
+		if (availableDrivers.isEmpty())
+		{
 			Log.e(TAG, "There are no available drivers!");
 			return null;
 		}
 
-		for(int j=0; j<availableDrivers.size(); j++)
+		for (int j = 0; j < availableDrivers.size(); j++)
 		{
 			UsbSerialDriver driver = availableDrivers.get(j);
-			System.out.println("Driver "+j);
-			Log.i(TAG, "Driver "+j);
+			System.out.println("Driver " + j);
+			Log.i(TAG, "Driver " + j);
 			UsbDeviceConnection connection = manager.openDevice(driver.getDevice());
-			if (connection == null) {
+			if (connection == null)
+			{
 				// You probably need to call UsbManager.requestPermission(driver.getDevice(), ..)
 				Log.e(TAG, "Connection null!");
 				return null;
 			}
-			for (int i = 0; i<driver.getPorts().size(); i++)
+			for (int i = 0; i < driver.getPorts().size(); i++)
 			{
-				System.out.println("Driver "+j+" port "+i);
-				Log.i(TAG, i+ " " + driver.getPorts().get(i).getSerial());
+				System.out.println("Driver " + j + " port " + i);
+				Log.i(TAG, i + " " + driver.getPorts().get(i).getSerial());
 			}
 
 		}
@@ -127,17 +130,19 @@ public class MainActivity extends AppCompatActivity
 	{
 		String TAG = "MainActivity:takeCameraImage";
 
-
 		//take picture
+		oldCameraAPI oAPI = new oldCameraAPI(this.getApplicationContext());
+		return oAPI.captureImage(this.getApplicationContext());
 		/*try
 		{
-			return cameraHandler.captureImage((CameraManager) getSystemService(Context.CAMERA_SERVICE));
+			//return cameraHandler.captureImage((CameraManager) getSystemService(Context.CAMERA_SERVICE));
 		}
 		catch (CameraAccessException e)
 		{
 			Log.e("Main:takeCameraImage", "Camera access exception: " + e.getLocalizedMessage());
-		}*/
-		return null;
+		}
+
+		return null;*/
 	}
 
 

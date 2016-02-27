@@ -11,7 +11,8 @@ public class BootUpReceiver extends BroadcastReceiver
 {
 
 	@Override
-	public void onReceive(Context context, Intent intent) {
+	public void onReceive(Context context, Intent intent)
+	{
 		//Code copied from http://www.khurramitdeveloper.blogspot.ca/2013/06/start-activity-or-service-on-boot.html
 		// TODO: This method is called when the BroadcastReceiver is receiving
 
