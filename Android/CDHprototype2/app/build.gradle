@@ -19,10 +19,16 @@ android {
     }
 }
 
+repositories {
+    jcenter()
+}
+
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
     compile project(':usbSerialForAndroid')
+    //compile 'com.ragnarok.rxcamera:lib:0.0.2'
+    compile 'net.bozho.easycamera:easycamera:0.0.1:aar@aar'
 }

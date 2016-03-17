@@ -1,12 +1,15 @@
 package com.example.aschere.cdhprototype2;
 
+import android.content.Context;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.*;
+import android.media.Image;
 import android.media.ImageReader;
 import android.os.Environment;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.util.Size;
+import android.view.SurfaceView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -23,14 +26,19 @@ import java.util.Objects;
  */
 public class CaptureCamera
 {
-	protected byte[] rawImage = null;
+	protected Image rawImage = null;
+	protected boolean rawImageFilled = false;
 	protected CameraManager cameraManager = null;
 	protected String mainCamera = null;
+	protected ImageReader imageReader = null;
+	protected boolean cameraOpened = false;
 
 	protected CaptureRequest.Builder captureBuilder;
 	protected CameraCaptureSession cameraCaptureSession;
 	protected CameraCharacteristics cameraCharacteristics;
 	protected CameraDevice cameraDevice;
+	protected Context appContext;
+
 	private final CameraDevice.StateCallback cameraCallback = new CameraDevice.StateCallback()
 	{
 		String TAG = "CameraStateCallback";
@@ -40,62 +48,29 @@ public class CaptureCamera
 		{
 			Log.i(TAG, "Camera opened! Camera is " + camera.getId());
 			cameraDevice = camera;
+			cameraOpened = true;
 		}
 
 		@Override
 		public void onDisconnected(@NonNull CameraDevice camera)
 		{
+			camera.close();
+			cameraOpened = false;
 			Log.w(TAG, "Camera disconnected!");
 		}
 
 		@Override
 		public void onError(@NonNull CameraDevice camera, int error)
 		{
+			camera.close();
+			cameraOpened = false;
 			Log.e(TAG, "Camera error! " + error);
 		}
 	};
-	protected ImageReader imageReader;
+
 	protected CameraCaptureSession.CaptureCallback captureCallback = new CameraCaptureSession.CaptureCallback()
 	{
 		String TAG = "CaptureCallback";
-
-		/**
-		 * This method is called when an image capture makes partial forward progress; some
-		 * (but not all) results from an image capture are available.
-		 * <p/>
-		 * <p>The result provided here will contain some subset of the fields of
-		 * a full result. Multiple {@link #onCaptureProgressed} calls may happen per
-		 * capture; a given result field will only be present in one partial
-		 * capture at most. The final {@link #onCaptureCompleted} call will always
-		 * contain all the fields (in particular, the union of all the fields of all
-		 * the partial results composing the total result).</p>
-		 * <p/>
-		 * <p>For each request, some result data might be available earlier than others. The typical
-		 * delay between each partial result (per request) is a single frame interval.
-		 * For performance-oriented use-cases, applications should query the metadata they need
-		 * to make forward progress from the partial results and avoid waiting for the completed
-		 * result.</p>
-		 * <p/>
-		 * <p>Each request will generate at least {@code 1} partial results, and at most
-		 * {@link CameraCharacteristics#REQUEST_PARTIAL_RESULT_COUNT} partial results.</p>
-		 * <p/>
-		 * <p>Depending on the request settings, the number of partial results per request
-		 * will vary, although typically the partial count could be the same as long as the
-		 * camera device subsystems enabled stay the same.</p>
-		 * <p/>
-		 * <p>The default implementation of this method does nothing.</p>
-		 *
-		 * @param session       the session returned by {@link CameraDevice#createCaptureSession}
-		 * @param request       The request that was given to the CameraDevice
-		 * @param partialResult The partial output metadata from the capture, which
-		 *                      includes a subset of the {@link TotalCaptureResult} fields.
-		 */
-		@Override
-		public void onCaptureProgressed(CameraCaptureSession session, CaptureRequest request, CaptureResult partialResult)
-		{
-			Log.i(TAG, "Capture progressed");
-			super.onCaptureProgressed(session, request, partialResult);
-		}
 
 		/**
 		 * This method is called when an image capture has fully completed and all the
@@ -119,7 +94,7 @@ public class CaptureCamera
 		@Override
 		public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result)
 		{
-			dumpRawFile(result);
+			rawImageFilled = dumpRawFile(result);
 			super.onCaptureCompleted(session, request, result);
 		}
 
@@ -143,6 +118,7 @@ public class CaptureCamera
 		public void onCaptureFailed(CameraCaptureSession session, CaptureRequest request, CaptureFailure failure)
 		{
 			Log.e(TAG, "Capture Failed!" + failure.getReason());
+			rawImageFilled = false;
 			super.onCaptureFailed(session, request, failure);
 		}
 
@@ -170,6 +146,7 @@ public class CaptureCamera
 		@Override
 		public void onCaptureSequenceCompleted(CameraCaptureSession session, int sequenceId, long frameNumber)
 		{
+			Log.i(TAG, "Capture session is done");
 			super.onCaptureSequenceCompleted(session, sequenceId, frameNumber);
 		}
 
@@ -198,6 +175,7 @@ public class CaptureCamera
 		public void onCaptureSequenceAborted(CameraCaptureSession session, int sequenceId)
 		{
 			Log.w(TAG, "Capture aborted!");
+			rawImageFilled = false;
 			super.onCaptureSequenceAborted(session, sequenceId);
 		}
 	};
@@ -205,9 +183,8 @@ public class CaptureCamera
 	private void setCameraDevice(CameraManager manglement)
 	{
 		String TAG = "setCameraDevice";
-		String[] rawCameraList;
+		String[] rawCameraList = null;
 
-		cameraManager = manglement;
 		try
 		{
 			rawCameraList = cameraManager.getCameraIdList();
@@ -252,7 +229,7 @@ public class CaptureCamera
 		//https://developer.android.com/training/camera/photobasics.html
 
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-		return "JPEG_" + timeStamp + "_" + ".raw";
+		return "RAW_" + timeStamp + "_" + ".dng";
 	}
 
 	/* Checks if external storage is available for read and write */
@@ -270,10 +247,11 @@ public class CaptureCamera
 				Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
 	}
 
-	public byte[] captureImage(CameraManager manglement) throws CameraAccessException, SecurityException
+	public Image captureImage() throws CameraAccessException, SecurityException,
+			NullPointerException
 	{
 		String TAG = "CaptureImage";
-		this.setCameraDevice(manglement);
+		this.setCameraDevice(cameraManager);
 
 		if (mainCamera == null)
 		{ //there is no main camera with necessary capabilities
@@ -283,8 +261,14 @@ public class CaptureCamera
 
 		//Open the camera
 		Log.i(TAG, "Trying to open camera...");
-		manglement.openCamera(mainCamera, cameraCallback, null);
-		//Log.i(TAG, "Camera opened!");
+		//cameraManager.openCamera(mainCamera, cameraCallback, null);
+		//cameraManager.openCamera(cameraManager.getCameraIdList()[0], cameraCallback, );
+
+		while(!cameraOpened)
+		{
+			;
+		}
+		Log.i(TAG, "A Camera opened!");
 
 		if (!Objects.equals(cameraDevice.getId(), mainCamera))
 		{ //there is no main camera with necessary capabilities
@@ -293,27 +277,22 @@ public class CaptureCamera
 		}
 
 		//TODO: Capture Image
+		cameraCharacteristics = cameraManager.getCameraCharacteristics(mainCamera);
+		Size cameraSize = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE);
+		SurfaceView surfaceView = new SurfaceView(appContext);
+
 		captureBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
 		//Auto-focus (code from android-Camera2Raw)
 		captureBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
 		//Auto-Exposure (ditto)
 		captureBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
 
-		int width;
-		int height;
+		imageReader = ImageReader.newInstance(cameraSize.getWidth(), cameraSize.getHeight(),
+				ImageFormat.RAW_SENSOR, 1);
+		//List<Surface> surfaces = new ArrayList<>();
+		//surfaces.add(imageReader.getSurface());
+		//simageReader.setOnImageAvailableListener();
 
-		try
-		{ //attempt to obtain the width and height of the camera result
-			width = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE).getWidth();
-			height = cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE).getHeight();
-		} catch (NullPointerException e)
-		{
-			Log.e(TAG, "Failed to obtain width or height or camera!" + e.getLocalizedMessage());
-			return null;
-		}
-
-		//Create receiving surface
-		imageReader = ImageReader.newInstance(width, height, ImageFormat.RAW_SENSOR, 2);
 		//cameraCaptureSession.prepare(imageReader.getSurface());
 		captureBuilder.addTarget(imageReader.getSurface());
 
@@ -321,12 +300,18 @@ public class CaptureCamera
 		CaptureRequest theRequest = captureBuilder.build();
 
 		//Capture
-		cameraCaptureSession.capture(theRequest, captureCallback, new Handler());
+		cameraCaptureSession.capture(theRequest, captureCallback, null);
 		//CameraDevice rawCamera =
 
 		//Save image
 
-		return null;
+		return rawImage;
+	}
+
+	public CaptureCamera (Context appContext, CameraManager manglement)
+	{
+		this.appContext = appContext;
+		this.cameraManager = manglement;
 	}
 
 	protected boolean dumpRawFile(TotalCaptureResult result)
@@ -339,6 +324,9 @@ public class CaptureCamera
 		{
 			FileOutputStream outputStream = new FileOutputStream(rawFile);
 			rawDumper.writeImage(outputStream, imageReader.acquireLatestImage());
+			Log.i(TAG, "Wrote image to file!");
+			rawImage = imageReader.acquireLatestImage();
+			Log.i(TAG, "Acquired image object!");
 			return true;
 		} catch (FileNotFoundException e)
 		{

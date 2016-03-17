@@ -132,6 +132,7 @@ public class oldCameraAPI extends AppCompatActivity
 	public byte[] captureImage(Context context)
 	{
 		String TAG = "oldCameraAPI:captureImage";
+		byteData=null;
 		if (!checkCameraHardware(context))
 		{
 			Log.e(TAG, "No camera on this device!");
@@ -144,16 +145,16 @@ public class oldCameraAPI extends AppCompatActivity
 			{
 				SurfaceView view = new SurfaceView(mainContext);
 				theCamera.setPreviewDisplay(view.getHolder());
+				theCamera.startPreview();
+				Log.w(TAG, "Preview started");
+				theCamera.takePicture(null, mPicture, null, null);
+				Log.w(TAG, "Picture taken");
+				theCamera.release();
+				Log.w(TAG, "Camera released");
 			} catch (IOException e)
 			{
 				e.printStackTrace();
 			}
-			theCamera.startPreview();
-			Log.w(TAG, "Preview started");
-			theCamera.takePicture(null, mPicture, null, null);
-			Log.w(TAG, "Picture taken");
-			theCamera.release();
-			Log.w(TAG, "Camera released");
 		}
 		while (!byteDataFilled)
 		{
